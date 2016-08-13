@@ -87,8 +87,11 @@ static void screen_paint()
 
 struct state * tft_menu_machine(const struct menu *my_menu)
 {
+	extern Adafruit_ST7735 tft;
+
 	menu_state = 0;
 	current_menu = my_menu;
+	tft.fillScreen(TM_TXT_BKG_COLOR); // erase before returning to menu system
 	screen_paint();
 	return &joystick_wait;
 }

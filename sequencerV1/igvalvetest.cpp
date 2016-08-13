@@ -17,6 +17,54 @@ void igValveTestExit();
 const struct state *igValveTestCheck();
 struct state igValveTest = { "igValveTest", &igValveTestEnter, &igValveTestExit, &igValveTestCheck};
 
+// local state of buttons.  Used to optimize display
+static unsigned char ls1;
+static unsigned char ls2;
+static unsigned char ols1;
+static unsigned char ols2;
+
+/*
+ * Display the button states.
+ * Lots of display constants here.
+ * If you use a different display you'll need to make edits here.
+ * Basic layout: screen is 128 high by 160 wide
+ * Each button is displayed in one of the two bottom corners.
+ * Display area of a button is 64 wide by 32 high
+ *
+ * Button display background is red if button pressed, else black
+ * Text in display is always white.
+ */
+static void igButtonDisplay()
+{
+	uint16_t c;
+
+	tft.setTextColor(TM_TXT_FG_COLOR);
+	tft.setTextSize(3);
+	if (ls1 != ols1) {
+		// Erase the display area to correct color.
+		// parameters are x,y of upper left, follwed by width and height
+		// then color
+		c = ls1? ST7735_RED: TM_TXT_BKG_COLOR;
+		c = ls1? ST7735_RED: ST7735_BLUE; //xxxx
+		tft.fillRect(0, 96, 64, 32, c);	// erase the display spot
+		tft.setCursor(4, 100);
+		tft.print("IPA");
+		ols1 = ls1;
+	}
+
+	if (ls2 != ols2) {
+		// Erase the display area to correct color.
+		// parameters are x,y of upper left, follwed by width and height
+		// then color
+		c = ls2? ST7735_RED: TM_TXT_BKG_COLOR;
+		c = ls2? ST7735_RED: ST7735_BLUE; //xxxx
+		tft.fillRect(96, 96, 64, 32, c);	// erase the display spot
+		tft.setCursor(100, 100);
+		tft.print("N2O");
+		ols2 = ls2;
+	}
+}
+
 /*
  * Ignition valve click-test
  * On entry, clear screen and write message
@@ -24,9 +72,20 @@ struct state igValveTest = { "igValveTest", &igValveTestEnter, &igValveTestExit,
 void igValveTestEnter()
 {
 	tft.fillScreen(TM_TXT_BKG_COLOR);
-	tft.setCursor(0, TM_TXT_OFFSET);
+	tft.setTextSize(TM_TXT_SIZE+1);
+	tft.setCursor(8, TM_TXT_OFFSET);
 	tft.setTextColor(TM_TXT_FG_COLOR);
-	tft.print("this is a long line of text.  Does it wrap?");
+	tft.print("Ig Valve");
+	tft.setTextSize(TM_TXT_SIZE);
+	tft.setCursor(20, TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
+	tft.setTextColor(TM_TXT_HIGH_COLOR);
+	tft.print("Click Test");
+	// force the display routine to refresh to state "off"
+	ols1 = 1;
+	ls1 = 0;
+	ols2 = 1;
+	ls2 = 0;
+	igButtonDisplay();
 }
 
 /*
@@ -34,6 +93,8 @@ void igValveTestEnter()
  */
 void igValveTestExit()
 {
+	o_ipaIgValve->cur_state = off;
+	o_n2oIgValve->cur_state = off;
 }
 
 /*
@@ -43,11 +104,12 @@ void igValveTestExit()
  */
 const struct state * igValveTestCheck()
 {
-	if (joystick_edge_value == JOY_PRESS) 
+	if (joystick_edge_value == JOY_PRESS)
 		return tft_menu_machine(&main_menu);
 
-	o_ipaIgValve->cur_state = i_push_1->current_val? on: off;
-	o_n2oIgValve->cur_state = i_push_2->current_val? on: off;
+	o_ipaIgValve->cur_state = (ls1 = i_push_1->current_val)? on: off;
+	o_n2oIgValve->cur_state = (ls2 = i_push_2->current_val)? on: off;
+	igButtonDisplay();
 
 	return &igValveTest;
 }
