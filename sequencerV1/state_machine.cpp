@@ -269,9 +269,15 @@ void handle_serial() {
 
 //TODO: check that names and pins are unique
 boolean validate_io() {
+  unsigned char ipin1;
+  unsigned char ipin2;
+  const unsigned char analog_pin = 0x80;	// bit to mark a pin as analog
+
   for (int i = 0; i < n_inputs; i++) {
+    ipin1 = inputs[i].pin;
     if (inputs[i].analog_th >= 0) {
       // analog pin
+      ipin1 |= analog_pin;
       if ((inputs[i].normal == multi_input || inputs[i].current == multi_input) &&
         inputs[i].analog_th != 0)
 	  return false;
@@ -284,16 +290,16 @@ boolean validate_io() {
     }
     if (inputs[i].analog_hyst < 0) return false;
     for (int j = i + 1; j < n_inputs; j++) {
-      if (inputs[i].pin == inputs[j].pin) return false;
+      ipin2 = inputs[j].pin;
+      if (inputs[j].analog_th >= 0)
+      	ipin2 |= analog_pin;
+      if (ipin1 == ipin2) return false;
     }
     for (int j = 0; j < n_outputs; j++) {
-      if (inputs[i].pin == outputs[j].pin) return false;
+      if (ipin1 == outputs[j].pin) return false;
     }
   }
   for (int i = 0; i < n_outputs; i++) {
-    for (int j = 0; j < n_inputs; j++) {
-      if (outputs[i].pin == inputs[j].pin) return false;
-    }
     for (int j = i + 1; j < n_outputs; j++) {
       if (outputs[i].pin == outputs[j].pin) return false;
     }

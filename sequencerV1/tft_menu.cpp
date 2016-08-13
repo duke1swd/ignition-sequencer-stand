@@ -7,6 +7,7 @@
 #include "state_machine.h"
 #include "joystick.h"
 #include "tft_menu.h"
+#include "io_ref.h"
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7735.h> // Hardware-specific library
 

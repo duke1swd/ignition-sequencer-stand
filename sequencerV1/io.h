@@ -116,29 +116,38 @@ struct input inputs[n_inputs] = {
     },
 };
 
-struct input * const i_joystick = inputs + 0;
-struct input * const i_ig_pressure = inputs + 1;
-struct input * const i_push_1 = inputs + 2;
-struct input * const i_push_2 = inputs + 3;
-struct input * const i_safe_ig = inputs + 4;
-struct input * const i_safe_main = inputs + 5;
-struct input * const i_cmd_1 = inputs + 6;
-struct input * const i_cmd_2 = inputs + 7;
+struct input * i_joystick = inputs + 0;
+struct input * i_ig_pressure = inputs + 1;
+struct input * i_push_1 = inputs + 2;
+struct input * i_push_2 = inputs + 3;
+struct input * i_safe_ig = inputs + 4;
+struct input * i_safe_main = inputs + 5;
+struct input * i_cmd_1 = inputs + 6;
+struct input * i_cmd_2 = inputs + 7;
 
-const int n_outputs = 1;
+const int n_outputs = 2;
 
 struct output outputs[n_outputs] = {
     {
-    	"led",		// name
-	13,		// pin
+    	"IPA Ig Valve",	// name
+	3,		// pin
 	active_high_out,// normal output mode
 	active_high_out,// current output mode
 	off,		// current state
 	0,		// last_change_t
-	//0,		// pulse_t
+	0,		// pulse_t
     },
+    {
+    	"N2O Ig Valve",	// name
+	4,		// pin
+	active_high_out,// normal output mode
+	active_high_out,// current output mode
+	off,		// current state
+	0,		// last_change_t
+	0,		// pulse_t
+    },
+
 };
 
-
-struct output * const o_led = outputs + 0;
-
+struct output * o_ipaIgValve = outputs + 0;
+struct output * o_n2oIgValve = outputs + 1;

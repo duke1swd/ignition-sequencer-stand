@@ -96,7 +96,7 @@ enum output_state {
 
 struct input {
   const char* const name;			// max 11 characters
-  int pin;
+  unsigned char pin;
   enum input_mode normal;
   enum input_mode current;
   int analog_th;		// set to -1 for digital pin, 0 for multi_input, and a value >= 0 for all others.
@@ -110,7 +110,7 @@ struct input {
 
 struct output {
   const char * const name;
-  int pin;
+  unsigned char pin;
   enum output_mode normal;
   enum output_mode current;
   enum output_state cur_state;

@@ -1,6 +1,6 @@
 extern const unsigned int joystick_ladder[];
 
-extern struct input * const i_joystick;
+extern unsigned char joystick_edge_value;
 
 #define	JOY_NONE	0
 #define	JOY_LEFT	1

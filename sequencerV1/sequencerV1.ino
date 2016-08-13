@@ -71,12 +71,10 @@ Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
 
 void menu_led_on();
 void menu_led_off();
-void igValveTestEnter();
 const struct state *menu_check();
-const struct state *igValveTestCheck();
 const struct state menu_action_1 = {"MA 1", &menu_led_on, NULL, &menu_check};
 const struct state menu_action_2 = {"MA 2", &menu_led_off, NULL, &menu_check};
-const struct state igValveTest = { "igValveTest", &igValveTestEnter, NULL, &igValveTestCheck};
+extern struct state igValveTest;	// Note: cannot use extern and const both.  Bug in linker?
 
 /*
  * Main menu
@@ -112,7 +110,7 @@ const struct menu_item main_menu_items[] = {
   },
 };
 
-const struct menu main_menu = {
+struct menu main_menu = {
   sizeof (main_menu_items) / sizeof (main_menu_items[0]),  // number of menu items
   main_menu_items
 };
@@ -120,26 +118,6 @@ const struct menu main_menu = {
 const struct state *check_startup()
 {
   return tft_menu_machine(&main_menu);
-}
-
-/*
- * Ignition valve click-test
- * On entry, clear screen and write message
- */
-void igValveTestEnter()
-{
-	tft.fillScreen(TM_TXT_BKG_COLOR);
-	tft.setCursor(0, TM_TXT_OFFSET);
-	tft.setTextColor(TM_TXT_FG_COLOR);
-	tft.print("this is a long line of text.  Does it wrap?");
- while(i_joystick->current_val == JOY_PRESS);
-}
-
-const struct state * igValveTestCheck()
-{
-	if (i_joystick->current_val == JOY_PRESS) 
-		return tft_menu_machine(&main_menu);
-	return &igValveTest;
 }
 
 /*
@@ -153,6 +131,29 @@ void menu_led_on()
 
 void menu_led_off()
 {
+}
+
+/*
+ * This routine handles capturing the joystick only on the edge.
+ *
+ * The variable joystick_edge_value contains the value of the joystick
+ * for exactly one iteration of loop().  After that it reverts to
+ * JOY_NONE until the next time something happens to the joystick.
+ *
+ * If a state's check routine decides on a new state because of the joystick
+ * then by the time the new state's check routine is called
+ * the joystick edge value will have been reset to JOY_NONE.
+ */
+static unsigned char joystick_old_value = JOY_NONE;
+unsigned char joystick_edge_value;
+
+static void joystick_edge_trigger()
+{
+	joystick_edge_value = i_joystick->current_val;
+	if (joystick_edge_value == joystick_old_value)
+		joystick_edge_value = JOY_NONE;
+	else
+		joystick_old_value = joystick_edge_value;
 }
 
 /*
@@ -208,6 +209,7 @@ void loop() {
 
   // basic state machine steps
   read_inputs();
+  joystick_edge_trigger();
   check_state();
   update_outputs();
 
