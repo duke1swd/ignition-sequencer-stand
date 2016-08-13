@@ -29,6 +29,8 @@
  *    June   30, 2016 -- initial attemps at coding.
  * V0.2:
  *    August  1, 2016 -- starting to add real code.  Inputs, outputs, valve click test.
+ * V0.3:
+ *    August 12, 2016 -- more pre-hardware code
  */
 
 #include <Adafruit_GFX.h>    // Core graphics library
