@@ -203,3 +203,6 @@ struct output * o_amberStatus = outputs + 3;
 struct output * o_redStatus = outputs + 4;
 struct output * o_powerStatus = outputs + 5;
 struct output * o_spark = outputs + 6;
+
+#define	IPAServoPin	5
+#define	N2OServoPin	6

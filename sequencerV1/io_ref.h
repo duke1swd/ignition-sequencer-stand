@@ -18,3 +18,6 @@ extern struct output * o_amberStatus;
 extern struct output * o_redStatus;
 extern struct output * o_powerStatus;
 extern struct output * o_spark;
+
+#define	IPAServoPin	5
+#define	N2OServoPin	6

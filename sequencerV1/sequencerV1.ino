@@ -77,6 +77,9 @@ const struct state menu_action_2 = {"MA 2", &menu_led_off, NULL, &menu_check};
 extern struct state igValveTest;	// Note: cannot use extern and const both.  Bug in linker?
 extern struct state rmEchoTest;
 extern struct state sparkTest;
+extern struct state mainValveTest;
+extern struct state igLocalTestEntry;
+extern struct state igRemoteTestEntry;
 
 /*
  * Main menu
@@ -92,7 +95,7 @@ const struct menu_item main_menu_items[] = {
   },
   {
      "Main Valve Test",
-     &menu_action_2
+     &mainValveTest,
   },
   {
      "Remote Echo",
@@ -100,11 +103,11 @@ const struct menu_item main_menu_items[] = {
   },
   {
      "Local Igniter",
-     &menu_action_2
+     &igLocalTestEntry,
   },
   {
      "Remote Igniter",
-     &menu_action_2
+     &igRemoteTestEntry,
   },
   {
      "Main Sequence",
@@ -172,6 +175,8 @@ const struct state *menu_check()
  *	Set up the state machine.
  */
 void setup() {
+  void mainValveInit();
+
   Serial.begin(9600);
   Serial.print("Build ");
   Serial.println(build_str);
@@ -183,6 +188,7 @@ void setup() {
     Serial.println("Invalid IO setup. This represents a potentially serious bug. Halting.");
     while (true);
   }
+  mainValveInit();
 
   o_powerStatus->cur_state = on;
   o_amberStatus->cur_state = on;
