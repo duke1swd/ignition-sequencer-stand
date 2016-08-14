@@ -1,5 +1,7 @@
 /*
- *  This code handles the ignition valve click test
+ *  This code handles the remote echo test.
+ *  Shows the status of the signals coming in
+ *  from the opto isolators
  */
 
 #include "state_machine.h"
@@ -12,12 +14,11 @@
 extern Adafruit_ST7735 tft;
 extern struct menu main_menu;
 
-void igValveTestEnter();
-void igValveTestExit();
-const struct state *igValveTestCheck();
-struct state igValveTest = { "igValveTest", &igValveTestEnter, &igValveTestExit, &igValveTestCheck};
+void rmEchoTestEnter();
+const struct state *rmEchoTestCheck();
+struct state rmEchoTest = { "rmEchoTest", &rmEchoTestEnter, NULL, &rmEchoTestCheck};
 
-// local state of buttons.  Used to optimize display
+// local state of inputs.  Used to optimize display
 static unsigned char ls1;
 static unsigned char ls2;
 static unsigned char ols1;
@@ -25,17 +26,9 @@ static unsigned char ols2;
 static unsigned char was_safe;
 
 /*
- * Display the button states.
- * Lots of display constants here.
- * If you use a different display you'll need to make edits here.
- * Basic layout: screen is 128 high by 160 wide
- * Each button is displayed in one of the two bottom corners.
- * Display area of a button is 64 wide by 32 high
- *
- * Button display background is red if button pressed, else black
- * Text in display is always white.
+ * Display the input states.  See igValveTest for comments on this routine.
  */
-static void igButtonDisplay()
+static void rmEchoDisplay()
 {
 	uint16_t c;
 
@@ -43,9 +36,9 @@ static void igButtonDisplay()
 	tft.setTextSize(3);
 
 	/*
-	 * Need igniter not safed, mains safed, or error
+	 * Need both igniter and mains safe for this test
 	 */
-	if (i_safe_ig->current_val == 1 || i_safe_main->current_val == 0) {
+	if (i_safe_ig->current_val == 1 || i_safe_main->current_val == 1) {
 		if (was_safe == 0) {
 			tft.fillRect(0,96,160,32, ST7735_RED);
 			tft.setCursor(12, 100);
@@ -60,10 +53,6 @@ static void igButtonDisplay()
 		was_safe = 0;
 		ols1 = ols2 = 2;
 	}
-
-	/*
-	 * Else display the input state
-	 */
 	if (ls1 != ols1) {
 		// Erase the display area to correct color.
 		// parameters are x,y of upper left, follwed by width and height
@@ -71,7 +60,7 @@ static void igButtonDisplay()
 		c = ls1? ST7735_RED: TM_TXT_BKG_COLOR;
 		tft.fillRect(0, 96, 64, 32, c);	// erase the display spot
 		tft.setCursor(4, 100);
-		tft.print("IPA");
+		tft.print("ONE");
 		ols1 = ls1;
 	}
 
@@ -82,7 +71,7 @@ static void igButtonDisplay()
 		c = ls2? ST7735_RED: TM_TXT_BKG_COLOR;
 		tft.fillRect(96, 96, 64, 32, c);	// erase the display spot
 		tft.setCursor(100, 100);
-		tft.print("N2O");
+		tft.print("TWO");
 		ols2 = ls2;
 	}
 }
@@ -91,50 +80,38 @@ static void igButtonDisplay()
  * Ignition valve click-test
  * On entry, clear screen and write message
  */
-void igValveTestEnter()
+void rmEchoTestEnter()
 {
 	tft.fillScreen(TM_TXT_BKG_COLOR);
 	tft.setTextSize(TM_TXT_SIZE+1);
 	tft.setCursor(8, TM_TXT_OFFSET);
 	tft.setTextColor(TM_TXT_FG_COLOR);
-	tft.print("Ig Valve");
+	tft.print("Remote");
 	tft.setTextSize(TM_TXT_SIZE);
 	tft.setCursor(20, TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
 	tft.setTextColor(TM_TXT_HIGH_COLOR);
-	tft.print("Click Test");
+	tft.print("Echo Test");
 	// force the display routine to refresh to state "off"
 	ols1 = 1;
 	ls1 = 0;
 	ols2 = 1;
 	ls2 = 0;
-	was_safe = 0;
-	igButtonDisplay();
-}
-
-/*
- * On exit make sure both valves are closed (off)
- */
-void igValveTestExit()
-{
-	o_ipaIgValve->cur_state = off;
-	o_n2oIgValve->cur_state = off;
+	rmEchoDisplay();
 }
 
 /*
  * The state machine calls this once per loop().
  * If the joystick has been pressed, then leave the test.
- * Otherwise copy the input buttons to the outputs.
+ * Otherwise just record the input state and display it.
  */
-const struct state * igValveTestCheck()
+const struct state * rmEchoTestCheck()
 {
 	if (joystick_edge_value == JOY_PRESS)
 		return tft_menu_machine(&main_menu);
 
-	if (i_safe_ig->current_val == 0) {
-		o_ipaIgValve->cur_state = (ls1 = i_push_1->current_val)? on: off;
-		o_n2oIgValve->cur_state = (ls2 = i_push_2->current_val)? on: off;
-	}
-	igButtonDisplay();
+	ls1 = i_cmd_1->current_val;
+	ls2 = i_cmd_2->current_val;
+	rmEchoDisplay();
 
-	return &igValveTest;
+	return &rmEchoTest;
 }
