@@ -1,9 +1,8 @@
 /*
- *  This code handles the remote echo test.
- *  Shows the status of the signals coming in
- *  from the opto isolators
+ *  This code handles the spark test
  */
 
+#include "parameters.h"
 #include "state_machine.h"
 #include "joystick.h"
 #include "tft_menu.h"
@@ -14,26 +13,28 @@
 extern Adafruit_ST7735 tft;
 extern struct menu main_menu;
 
-void rmEchoTestEnter();
-const struct state *rmEchoTestCheck();
-struct state rmEchoTest = { "rmEchoTest", &rmEchoTestEnter, NULL, &rmEchoTestCheck};
+void sparkTestEnter();
+void sparkTestExit();
+const struct state *sparkTestCheck();
+struct state sparkTest = { "sparkTest", &sparkTestEnter, &sparkTestExit, &sparkTestCheck};
 
-// local state of inputs.  Used to optimize display
-static unsigned char ls1;
-static unsigned char ls2;
+// local state of buttons.  Used to optimize display
+static unsigned char ls1;	// edge triggered
+static unsigned char els1;
 static unsigned char ols1;
+static unsigned char ls2;
 static unsigned char ols2;
 static unsigned char was_safe;
 
 static bool safe_ok()
 {
-	return i_safe_ig->current_val == 1 && i_safe_main->current_val == 1;
+	return i_safe_ig->current_val == 0 && i_safe_main->current_val == 1;
 }
 
 /*
- * Display the input states.  See igValveTest for comments on this routine.
+ * Manage display.  See igValveTest for details.
  */
-static void rmEchoDisplay()
+static void sparkButtonDisplay()
 {
 	uint16_t c;
 
@@ -41,7 +42,7 @@ static void rmEchoDisplay()
 	tft.setTextSize(3);
 
 	/*
-	 * Need both igniter and mains safe for this test
+	 * Need igniter and mains safed, or error
 	 */
 	if (!safe_ok()) {
 		if (was_safe == 0) {
@@ -58,6 +59,10 @@ static void rmEchoDisplay()
 		was_safe = 0;
 		ols1 = ols2 = 2;
 	}
+
+	/*
+	 * Else display the input state
+	 */
 	if (ls1 != ols1) {
 		// Erase the display area to correct color.
 		// parameters are x,y of upper left, follwed by width and height
@@ -65,7 +70,7 @@ static void rmEchoDisplay()
 		c = ls1? ST7735_RED: TM_TXT_BKG_COLOR;
 		tft.fillRect(0, 96, 64, 32, c);	// erase the display spot
 		tft.setCursor(4, 100);
-		tft.print("ONE");
+		tft.print("one");
 		ols1 = ls1;
 	}
 
@@ -76,7 +81,7 @@ static void rmEchoDisplay()
 		c = ls2? ST7735_RED: TM_TXT_BKG_COLOR;
 		tft.fillRect(96, 96, 64, 32, c);	// erase the display spot
 		tft.setCursor(100, 100);
-		tft.print("TWO");
+		tft.print("RUN");
 		ols2 = ls2;
 	}
 }
@@ -85,38 +90,77 @@ static void rmEchoDisplay()
  * Ignition valve click-test
  * On entry, clear screen and write message
  */
-void rmEchoTestEnter()
+void sparkTestEnter()
 {
 	tft.fillScreen(TM_TXT_BKG_COLOR);
 	tft.setTextSize(TM_TXT_SIZE+1);
-	tft.setCursor(8, TM_TXT_OFFSET);
+	tft.setCursor(32, TM_TXT_OFFSET);
 	tft.setTextColor(TM_TXT_FG_COLOR);
-	tft.print("Remote");
+	tft.print("SPARK");
 	tft.setTextSize(TM_TXT_SIZE);
-	tft.setCursor(20, TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
+	tft.setCursor(50, TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
 	tft.setTextColor(TM_TXT_HIGH_COLOR);
-	tft.print("Echo Test");
+	tft.print("Test");
 	// force the display routine to refresh to state "off"
 	ols1 = 1;
 	ls1 = 0;
+	els1 = 0;
 	ols2 = 1;
 	ls2 = 0;
-	rmEchoDisplay();
+	was_safe = 0;
+	sparkButtonDisplay();
+	o_ipaIgValve->cur_state = off;
+	o_n2oIgValve->cur_state = off;
+}
+
+/*
+ * On exit make sure both valves are closed (off)
+ */
+void sparkTestExit()
+{
+	o_spark->cur_state = off;
 }
 
 /*
  * The state machine calls this once per loop().
  * If the joystick has been pressed, then leave the test.
- * Otherwise just record the input state and display it.
+ * Otherwise copy the input buttons to the outputs.
  */
-const struct state * rmEchoTestCheck()
+const struct state * sparkTestCheck()
 {
+	static unsigned long run_start_t;
+	unsigned long t;
+
 	if (joystick_edge_value == JOY_PRESS)
 		return tft_menu_machine(&main_menu);
 
-	ls1 = i_cmd_1->current_val;
-	ls2 = i_cmd_2->current_val;
-	rmEchoDisplay();
+	// make ls1 edge triggered
+	ls1 = i_push_1->current_val;
+	if (ls1 == 1 && els1 == 1)
+		ls1 = 0;
+	else
+		els1 = ls1;
 
-	return &rmEchoTest;
+	ls2 = i_push_2->current_val;
+	// Cannot do both tests.
+	if (ls1 || els1)
+		ls2 = 0;
+
+	if (ls2 == 1 && ols2 == 0)
+		run_start_t = loop_start_t;
+
+	sparkButtonDisplay();
+
+	if (safe_ok()) {
+		// one-shot on button one.
+		o_spark->cur_state = ls1? on: off;
+
+		// continuous run on button two
+		if (ls2) {
+			t = (loop_start_t - run_start_t) % spark_period;
+			o_spark->cur_state = (t == 0)? on: off;
+		}
+	}
+
+	return &sparkTest;
 }

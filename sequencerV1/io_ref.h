@@ -13,3 +13,8 @@ extern struct input * i_cmd_2;
 
 extern struct output * o_ipaIgValve;
 extern struct output * o_n2oIgValve;
+extern struct output * o_greenStatus;
+extern struct output * o_amberStatus;
+extern struct output * o_redStatus;
+extern struct output * o_powerStatus;
+extern struct output * o_spark;

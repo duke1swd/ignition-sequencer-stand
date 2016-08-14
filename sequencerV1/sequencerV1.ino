@@ -76,6 +76,7 @@ const struct state menu_action_1 = {"MA 1", &menu_led_on, NULL, &menu_check};
 const struct state menu_action_2 = {"MA 2", &menu_led_off, NULL, &menu_check};
 extern struct state igValveTest;	// Note: cannot use extern and const both.  Bug in linker?
 extern struct state rmEchoTest;
+extern struct state sparkTest;
 
 /*
  * Main menu
@@ -87,7 +88,7 @@ const struct menu_item main_menu_items[] = {
   },
   {
      "Spark Test",
-     &menu_action_2
+     &sparkTest,
   },
   {
      "Main Valve Test",
@@ -182,6 +183,10 @@ void setup() {
     Serial.println("Invalid IO setup. This represents a potentially serious bug. Halting.");
     while (true);
   }
+
+  o_powerStatus->cur_state = on;
+  o_amberStatus->cur_state = on;
+  o_redStatus->cur_state = off;	// this is initialized to "on", in case of invalid IO config.
 
   // initialize the 1.8" TFT screen
   tft.initR(INITR_BLACKTAB);  // initialize a ST7735S chip, black tab

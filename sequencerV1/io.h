@@ -127,7 +127,7 @@ struct input * i_safe_main = inputs + 5;
 struct input * i_cmd_1 = inputs + 6;
 struct input * i_cmd_2 = inputs + 7;
 
-const int n_outputs = 2;
+const int n_outputs = 7;
 
 struct output outputs[n_outputs] = {
     {
@@ -148,8 +148,58 @@ struct output outputs[n_outputs] = {
 	0,		// last_change_t
 	0,		// pulse_t
     },
+    {
+    	"GREEN LED",	// name
+	15,		// pin
+	active_high_out,// normal output mode
+	active_high_out,// current output mode
+	off,		// current state
+	0,		// last_change_t
+	0,		// pulse_t
+    },
+    {
+    	"AMBER LED",	// name
+	17,		// pin
+	active_high_out,// normal output mode
+	active_high_out,// current output mode
+	off,		// current state
+	0,		// last_change_t
+	0,		// pulse_t
+    },
+    {
+    	"RED LED",	// name
+	16,		// pin
+	active_high_out,// normal output mode
+	active_high_out,// current output mode
+	on,		// current state	turns off once state machine loop starts up
+	0,		// last_change_t
+	0,		// pulse_t
+    },
+    {
+    	"Power LED",	// name
+	14,		// pin
+	active_high_out,// normal output mode
+	active_high_out,// current output mode
+	off,		// current state	turns green once state machine loop starts up
+	0,		// last_change_t
+	0,		// pulse_t
+    },
+    {
+    	"Spark",	// name
+	9,		// pin
+	active_high_out,// normal output mode
+	active_high_out,// current output mode
+	off,		// current state
+	0,		// last_change_t
+	0,		// pulse_t
+    },
 
 };
 
 struct output * o_ipaIgValve = outputs + 0;
 struct output * o_n2oIgValve = outputs + 1;
+struct output * o_greenStatus = outputs + 2;
+struct output * o_amberStatus = outputs + 3;
+struct output * o_redStatus = outputs + 4;
+struct output * o_powerStatus = outputs + 5;
+struct output * o_spark = outputs + 6;

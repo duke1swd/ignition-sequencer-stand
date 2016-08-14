@@ -24,6 +24,11 @@ static unsigned char ols1;
 static unsigned char ols2;
 static unsigned char was_safe;
 
+static bool safe_ok()
+{
+	return i_safe_ig->current_val == 0 && i_safe_main->current_val == 1;
+}
+
 /*
  * Display the button states.
  * Lots of display constants here.
@@ -45,7 +50,7 @@ static void igButtonDisplay()
 	/*
 	 * Need igniter not safed, mains safed, or error
 	 */
-	if (i_safe_ig->current_val == 1 || i_safe_main->current_val == 0) {
+	if (!safe_ok()) {
 		if (was_safe == 0) {
 			tft.fillRect(0,96,160,32, ST7735_RED);
 			tft.setCursor(12, 100);
@@ -130,7 +135,7 @@ const struct state * igValveTestCheck()
 	if (joystick_edge_value == JOY_PRESS)
 		return tft_menu_machine(&main_menu);
 
-	if (i_safe_ig->current_val == 0) {
+	if (safe_ok()) {
 		o_ipaIgValve->cur_state = (ls1 = i_push_1->current_val)? on: off;
 		o_n2oIgValve->cur_state = (ls2 = i_push_2->current_val)? on: off;
 	}
