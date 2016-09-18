@@ -66,8 +66,8 @@ struct input inputs[n_inputs] = {
 	// True when igniter has been safed.
 	"safe igniter",	// name
 	22,		// pin
-	active_low_pullup,// normal input mode
-	active_low_pullup,// current input mode
+	active_high_pullup,// normal input mode
+	active_high_pullup,// current input mode
 	-1,		// analog_th	must be < 0 for digital pin
 	0,		// analog_hyst	unused
 	0,		// prev_val

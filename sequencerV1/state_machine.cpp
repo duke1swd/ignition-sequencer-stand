@@ -7,7 +7,7 @@ char input_buf[INPUT_BUF_SZ];
 int input_idx = 0;
 boolean input_discard = false;
 boolean cmd_valid = false;
-const boolean verbose = false;
+const boolean verbose = true;
 
 const unsigned long debounce_t = 25;
 

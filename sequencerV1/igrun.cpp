@@ -23,7 +23,7 @@ const struct state *igTestCheck();
 struct state igLocalTestEntry = { "igLocalTest", &igLRTestEnter, NULL, &igLocalTestEntryCheck};
 struct state igRemoteTestEntry = { "igRemoteTest", &igLRTestEnter, NULL, &igRemoteTestEntryCheck};
 struct state igTest = { "igTest", &igTestEnter, &igTestExit, &igTestCheck};
-
+//
 // local state of buttons.  Used to optimize display
 static unsigned char ls1;
 static unsigned char ls2;
@@ -123,8 +123,13 @@ void igLRTestEnter()
 const struct state * igLocalTestEntryCheck()
 {
 	unsigned char e;
+	unsigned int p;
 
-	if (i_ig_pressure->filter_a < min_pressure)
+	p = i_ig_pressure->filter_a;
+	if (!SENSOR_SANE(p))
+		return error_state(errorPressureInsane);
+
+	if (p < min_pressure || p > max_idle_pressure)
 		return error_state(errorIgNoPressure);
 
 	if (joystick_edge_value == JOY_PRESS)
@@ -147,8 +152,14 @@ const struct state * igLocalTestEntryCheck()
 const struct state * igRemoteTestEntryCheck()
 {
 	unsigned char e;
+	unsigned int p;
 
-	if (i_ig_pressure->filter_a < min_pressure)
+	p = i_ig_pressure->filter_a;
+	if (!SENSOR_SANE(p))
+		return error_state(errorPressureInsane);
+
+
+	if (p < min_pressure || p > max_idle_pressure)
 		return error_state(errorIgNoPressure);
 
 	if (joystick_edge_value == JOY_PRESS)
@@ -190,6 +201,8 @@ void igTestExit()
 	o_spark->cur_state = off;
 	o_ipaIgValve->cur_state = off;
 	o_n2oIgValve->cur_state = off;
+	o_amberStatus->cur_state = on;
+	o_greenStatus->cur_state = off;
 }
 
 /*
@@ -200,14 +213,21 @@ void igTestExit()
 const struct state * igTestCheck()
 {
 	unsigned long t;
+	unsigned int p;
 
-	t = (loop_start_t - run_start_t) % spark_period;
+	p = i_ig_pressure->filter_a;
+
+	if (!SENSOR_SANE(p))
+		return error_state(errorPressureInsane);
+
+	t = loop_start_t - run_start_t;
 
 	// check for abort conditions
 
 	// operator abort by remote, button 2, or joystick
 	if (joystick_edge_value == JOY_PRESS ||
-	    i_cmd_2->current_val || i_push_1->current_val)
+			i_cmd_2->current_val ||
+			i_push_2->current_val)
 		return error_state(errorIgTestAborted);
 
 	// operator abort by safe switch
@@ -215,19 +235,19 @@ const struct state * igTestCheck()
 		return error_state(errorIgTestSafe);
 
 	// abort if pressure sensor broken
-	if (i_ig_pressure->filter_a < min_pressure)
+	if (p < min_pressure)
 		return error_state(errorIgNoPressure);
 
 	// abort if no ignition within time limit
 	if (t > ig_pressure_time && i_ig_pressure->filter_a < good_pressure)
 		return error_state(errorIgNoIg);
 
-	// abort of chamber pressure too high
-	if (i_ig_pressure->filter_a > max_ig_pressure)
+	// abort if chamber pressure too high
+	if (p > max_ig_pressure)
 		return error_state(errorIgOverPressure);
 
 	// Run spark
-	o_spark->cur_state = (t == 0)? on: off;
+	o_spark->cur_state = ((t % spark_period) < spark_period/2)? on: off;
 
 	// Turn on valves at time
 	if (t >= ig_ipa_time)
@@ -235,11 +255,19 @@ const struct state * igTestCheck()
 
 	if (t >= ig_n2o_time)
 		o_n2oIgValve->cur_state = on;
+	
+	// Status lights
+	if (p > good_pressure) {
+		if (at_pressure_t == 0)
+			at_pressure_t = loop_start_t;
+		o_amberStatus->cur_state = off;
+		o_greenStatus->cur_state = on;
+	} else {
+		o_amberStatus->cur_state = on;
+		o_greenStatus->cur_state = off;
+	}
 
 	// Stop after prescribed run time.
-	if (at_pressure_t == 0 && i_ig_pressure->filter_a > good_pressure)
-		at_pressure_t = loop_start_t;
-
 	if (at_pressure_t > 0 && loop_start_t - at_pressure_t > ig_run_time)
 		return tft_menu_machine(&main_menu);
 

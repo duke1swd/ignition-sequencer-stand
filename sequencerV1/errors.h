@@ -8,5 +8,6 @@ const unsigned char errorIgTestSafe =		error_base + 1;		// test aborted by safe 
 const unsigned char errorIgNoPressure =		error_base + 2;		// pressure sensor not working
 const unsigned char errorIgNoIg =		error_base + 3;		// no ignition
 const unsigned char errorIgOverPressure =	error_base + 4;		// too much pressure in ignition system
+const unsigned char errorPressureInsane =	error_base + 5;		// pressure sensor broken or not connected
 
-extern struct state * error_state(unsigned char error_code);
+extern const struct state * error_state(unsigned char error_code);
