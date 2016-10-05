@@ -33,6 +33,8 @@
  *    August 12, 2016 -- more pre-hardware code
  * V0.4:
  *    September 17, 2016 -- running on hardware.  Igniter control mostly done.
+ * V0.5:
+ *    October 4, 2016 -- running on harware.  Igniter local test producing flames
  */
 
 #include <Adafruit_GFX.h>    // Core graphics library
