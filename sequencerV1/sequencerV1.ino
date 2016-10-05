@@ -31,6 +31,8 @@
  *    August  1, 2016 -- starting to add real code.  Inputs, outputs, valve click test.
  * V0.3:
  *    August 12, 2016 -- more pre-hardware code
+ * V0.4:
+ *    September 17, 2016 -- running on hardware.  Igniter control mostly done.
  */
 
 #include <Adafruit_GFX.h>    // Core graphics library
@@ -176,6 +178,7 @@ const struct state *menu_check()
  */
 void setup() {
   void mainValveInit();
+  void panic(const char *msg);
 
   Serial.begin(9600);
   Serial.print("Build ");
@@ -184,15 +187,16 @@ void setup() {
   Serial.println("Startup.");
   setup_inputs();
   setup_outputs();
-  if (!validate_io()) {
-    Serial.println("Invalid IO setup. This represents a potentially serious bug. Halting.");
-    while (true);
-  }
+  digitalWrite(o_powerStatus->pin, HIGH);
+  if (!validate_io())
+    panic("Invalid I/O Setup");
   mainValveInit();
 
+  // status LEDs
   o_powerStatus->cur_state = on;
+  o_greenStatus->cur_state = off;
   o_amberStatus->cur_state = on;
-  o_redStatus->cur_state = off;	// this is initialized to "on", in case of invalid IO config.
+  o_redStatus->cur_state = off;
 
   // initialize the 1.8" TFT screen
   tft.initR(INITR_BLACKTAB);  // initialize a ST7735S chip, black tab

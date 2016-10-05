@@ -17,12 +17,15 @@ extern struct menu main_menu;
 void igTestEnter();
 void igTestExit();
 void igLRTestEnter();
+void igReportEnter();
 const struct state *igLocalTestEntryCheck();
 const struct state *igRemoteTestEntryCheck();
 const struct state *igTestCheck();
+const struct state *igRepCheck();
 struct state igLocalTestEntry = { "igLocalTest", &igLRTestEnter, NULL, &igLocalTestEntryCheck};
 struct state igRemoteTestEntry = { "igRemoteTest", &igLRTestEnter, NULL, &igRemoteTestEntryCheck};
 struct state igTest = { "igTest", &igTestEnter, &igTestExit, &igTestCheck};
+struct state igRunReport { "igRunRep", &igReportEnter, NULL, igRepCheck};
 //
 // local state of buttons.  Used to optimize display
 static unsigned char ls1;
@@ -30,6 +33,12 @@ static unsigned char ls2;
 static unsigned char ols1;
 static unsigned char ols2;
 static unsigned char was_safe;
+
+static long rep_run_time;
+static long rep_pressure_time;
+static long rep_n_samples;
+static long rep_max_pressure;
+static long rep_sum_pressure;
 
 static bool safe_ok()
 {
@@ -182,12 +191,15 @@ const struct state * igRemoteTestEntryCheck()
 /*
  * Run the test here.
  */
-static unsigned long run_start_t;
 static unsigned long at_pressure_t;
 
 void igTestEnter()
 {
-	run_start_t = loop_start_t;
+	rep_run_time = 0;
+	rep_pressure_time = 0;
+	rep_n_samples = 0;
+	rep_max_pressure = 0;
+	rep_sum_pressure = 0;
 	at_pressure_t = 0;
 	igTestExit();
 }
@@ -213,14 +225,28 @@ void igTestExit()
 const struct state * igTestCheck()
 {
 	unsigned long t;
+	unsigned long a;
 	unsigned int p;
 
+	void spark_run();
+
 	p = i_ig_pressure->filter_a;
+	if (p > rep_max_pressure)
+		rep_max_pressure = p;
 
 	if (!SENSOR_SANE(p))
 		return error_state(errorPressureInsane);
 
-	t = loop_start_t - run_start_t;
+	// t is how long we've been in this state
+	t = loop_start_t - state_enter_t;
+
+	// a is how long we've been at pressure
+	a = 0;
+	if (at_pressure_t) {
+		rep_n_samples++;
+		rep_sum_pressure += p;
+		a = loop_start_t - at_pressure_t;
+	}
 
 	// check for abort conditions
 
@@ -239,15 +265,16 @@ const struct state * igTestCheck()
 		return error_state(errorIgNoPressure);
 
 	// abort if no ignition within time limit
-	if (t > ig_pressure_time && i_ig_pressure->filter_a < good_pressure)
+	if (t > ig_pressure_time && p < good_pressure)
 		return error_state(errorIgNoIg);
 
 	// abort if chamber pressure too high
 	if (p > max_ig_pressure)
 		return error_state(errorIgOverPressure);
 
-	// Run spark
-	o_spark->cur_state = ((t % spark_period) < spark_period/2)? on: off;
+	// Run spark for ig_spark_time ms after we are at pressure
+	if (at_pressure_t == 0 || a < ig_spark_time)
+		spark_run();
 
 	// Turn on valves at time
 	if (t >= ig_ipa_time)
@@ -257,19 +284,68 @@ const struct state * igTestCheck()
 		o_n2oIgValve->cur_state = on;
 	
 	// Status lights
-	if (p > good_pressure) {
-		if (at_pressure_t == 0)
+	if (p >= good_pressure) {
+		if (at_pressure_t == 0) {
 			at_pressure_t = loop_start_t;
+			rep_pressure_time = t;
+		}
 		o_amberStatus->cur_state = off;
 		o_greenStatus->cur_state = on;
 	} else {
 		o_amberStatus->cur_state = on;
 		o_greenStatus->cur_state = off;
+		// if we've lost pressure, abort to report.
+		if (a > ig_pressure_grace) {
+			rep_run_time = a;
+			return &igRunReport;
+		}
+			
 	}
 
 	// Stop after prescribed run time.
-	if (at_pressure_t > 0 && loop_start_t - at_pressure_t > ig_run_time)
-		return tft_menu_machine(&main_menu);
+	if (a > ig_run_time) {
+		rep_run_time = a;
+		return &igRunReport;
+	}
 
 	return &igTest;
+}
+
+/*
+ * Put the report on the screen
+ * Prints
+ *	run time,
+ *	time at first pressure
+ *	ave pressure
+ *	max pressure
+ */
+void igReportEnter()
+{
+	// background is Blue
+	tft.fillScreen(ST7735_BLUE);
+	tft.setTextSize(TM_TXT_SIZE+1);
+	tft.setCursor(8, TM_TXT_OFFSET);
+	// text is probably white
+	tft.setTextColor(TM_TXT_FG_COLOR);
+	tft.print("REPORT");
+	tft.setTextSize(TM_TXT_SIZE);
+	tft.setCursor(20, 1 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
+	tft.print(rep_run_time);
+	tft.setCursor(0, 2 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
+	tft.print(rep_pressure_time);
+	tft.setCursor(0, 3 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
+	tft.print(rep_max_pressure);
+	tft.setCursor(0, 4 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
+	tft.print(rep_sum_pressure/rep_n_samples);
+}
+
+/*
+ * This routine figures out when to stop displaying the status report.
+ */
+
+const struct state * igRepCheck()
+{
+	if (joystick_edge_value == JOY_PRESS)
+		return tft_menu_machine(&main_menu);
+	return &igRunReport;
 }

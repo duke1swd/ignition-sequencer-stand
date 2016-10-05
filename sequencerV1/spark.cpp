@@ -121,6 +121,11 @@ void sparkTestExit()
 	o_spark->cur_state = off;
 }
 
+void spark_run()
+{
+	o_spark->cur_state = (loop_start_t % spark_period < spark_period/2)? on: off;
+}
+
 /*
  * The state machine calls this once per loop().
  * If the joystick has been pressed, then leave the test.
@@ -128,9 +133,6 @@ void sparkTestExit()
  */
 const struct state * sparkTestCheck()
 {
-	static unsigned long run_start_t;
-	unsigned long t;
-
 	if (joystick_edge_value == JOY_PRESS)
 		return tft_menu_machine(&main_menu);
 
@@ -146,20 +148,16 @@ const struct state * sparkTestCheck()
 	if (ls1 || els1)
 		ls2 = 0;
 
-	if (ls2 == 1 && ols2 == 0)
-		run_start_t = loop_start_t;
-
 	sparkButtonDisplay();
 
 	if (safe_ok()) {
-		// one-shot on button one.
-		o_spark->cur_state = ls1? on: off;
 
 		// continuous run on button two
-		if (ls2) {
-			t = (loop_start_t - run_start_t) % spark_period;
-			o_spark->cur_state = (t == 0)? on: off;
-		}
+		if (ls2)
+			spark_run();
+		// one-shot on button one.
+		else
+			o_spark->cur_state = ls1? on: off;
 	}
 
 	return &sparkTest;
