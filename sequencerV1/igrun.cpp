@@ -26,6 +26,7 @@ struct state igLocalTestEntry = { "igLocalTest", &igLRTestEnter, NULL, &igLocalT
 struct state igRemoteTestEntry = { "igRemoteTest", &igLRTestEnter, NULL, &igRemoteTestEntryCheck};
 struct state igTest = { "igTest", &igTestEnter, &igTestExit, &igTestCheck};
 struct state igRunReport { "igRunRep", &igReportEnter, NULL, igRepCheck};
+const struct state *igThisTest;
 //
 // local state of buttons.  Used to optimize display
 static unsigned char ls1;
@@ -33,6 +34,7 @@ static unsigned char ls2;
 static unsigned char ols1;
 static unsigned char ols2;
 static unsigned char was_safe;
+static unsigned char was_power;
 
 static long rep_run_time;
 static long rep_pressure_time;
@@ -45,6 +47,10 @@ static bool safe_ok()
 	return i_safe_ig->current_val == 0 && i_safe_main->current_val == 1;
 }
 
+static bool power_ok()
+{
+	return i_power_sense->current_val == 1;
+}
 /*
  * Display the button states.
  */
@@ -58,19 +64,31 @@ static void igTestDisplay()
 	/*
 	 * Need igniter not safed, mains safed, or error
 	 */
+	if (!power_ok()) {
+		if (was_power == 0) {
+			tft.fillRect(0,96,160,32, ST7735_RED);
+			tft.setCursor(12, 100);
+			tft.setTextColor(ST7735_WHITE);
+			tft.print("NO POWER");
+			was_power = 1;
+		}
+		return;
+	}
 	if (!safe_ok()) {
 		if (was_safe == 0) {
 			tft.fillRect(0,96,160,32, ST7735_RED);
 			tft.setCursor(12, 100);
+			tft.setTextColor(ST7735_WHITE);
 			tft.print("SAFE ERR");
 			was_safe = 1;
 		}
 		return;
 	}
 
-	if (was_safe) {
+	if (was_safe || was_power) {
 		tft.fillRect(64, 96, 32, 32, TM_TXT_BKG_COLOR);
 		was_safe = 0;
+		was_power = 0;
 		ols1 = ols2 = 2;
 	}
 
@@ -106,14 +124,16 @@ static void igTestDisplay()
  */
 void igLRTestEnter()
 {
+	extern const struct state * current_state;
+
 	tft.fillScreen(TM_TXT_BKG_COLOR);
 	tft.setTextSize(TM_TXT_SIZE+1);
 	tft.setCursor(8, TM_TXT_OFFSET);
-	tft.setTextColor(TM_TXT_FG_COLOR);
+	tft.setTextColor(TM_TXT_HIGH_COLOR);
 	tft.print("IGNITION");
 	tft.setTextSize(TM_TXT_SIZE);
 	tft.setCursor(20, TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
-	tft.setTextColor(TM_TXT_HIGH_COLOR);
+	tft.setTextColor(TM_TXT_FG_COLOR);
 	tft.print("Test");
 	// force the display routine to refresh to state "off"
 	ols1 = 1;
@@ -121,7 +141,9 @@ void igLRTestEnter()
 	ols2 = 1;
 	ls2 = 0;
 	was_safe = 0;
+	was_power = 0;
 	igTestDisplay();
+	igThisTest = current_state;
 }
 
 /*
@@ -144,7 +166,7 @@ const struct state * igLocalTestEntryCheck()
 	if (joystick_edge_value == JOY_PRESS)
 		return tft_menu_machine(&main_menu);
 
-	if (safe_ok()) {
+	if (safe_ok() && power_ok()) {
 		ls1 = i_push_1->current_val;
 		ls2 = i_push_2->current_val;
 	} else
@@ -174,7 +196,7 @@ const struct state * igRemoteTestEntryCheck()
 	if (joystick_edge_value == JOY_PRESS)
 		return tft_menu_machine(&main_menu);
 
-	if (safe_ok()) {
+	if (safe_ok() && power_ok()) {
 		ls1 = i_cmd_1->current_val;
 		ls2 = i_cmd_2->current_val;
 	} else
@@ -202,6 +224,7 @@ void igTestEnter()
 	rep_sum_pressure = 0;
 	at_pressure_t = 0;
 	igTestExit();
+	o_daq0->cur_state = on;	// goes on at commanded start
 }
 
 /*
@@ -215,6 +238,8 @@ void igTestExit()
 	o_n2oIgValve->cur_state = off;
 	o_amberStatus->cur_state = on;
 	o_greenStatus->cur_state = off;
+	o_daq0->cur_state = off;
+	o_daq1->cur_state = off;
 }
 
 /*
@@ -229,6 +254,7 @@ const struct state * igTestCheck()
 	unsigned int p;
 
 	void spark_run();
+
 
 	p = i_ig_pressure->filter_a;
 	if (p > rep_max_pressure)
@@ -260,13 +286,12 @@ const struct state * igTestCheck()
 	if (!safe_ok())
 		return error_state(errorIgTestSafe);
 
+	if (!power_ok())
+		return error_state(errorIgTestPower);
+
 	// abort if pressure sensor broken
 	if (p < min_pressure)
 		return error_state(errorIgNoPressure);
-
-	// abort if no ignition within time limit
-	if (t > ig_pressure_time && p < good_pressure)
-		return error_state(errorIgNoIg);
 
 	// abort if chamber pressure too high
 	if (p > max_ig_pressure)
@@ -291,6 +316,7 @@ const struct state * igTestCheck()
 		}
 		o_amberStatus->cur_state = off;
 		o_greenStatus->cur_state = on;
+		o_daq1->cur_state = on;		// first goes on at first pressure sense
 	} else {
 		o_amberStatus->cur_state = on;
 		o_greenStatus->cur_state = off;
@@ -302,8 +328,12 @@ const struct state * igTestCheck()
 			
 	}
 
+	// abort if no ignition within time limit
+	if (at_pressure_t == 0 && t > ig_pressure_time && p < good_pressure)
+		return error_state(errorIgNoIg);
+
 	// Stop after prescribed run time.
-	if (a > ig_run_time) {
+	if (t > too_long_time || a > ig_run_time) {
 		rep_run_time = a;
 		return &igRunReport;
 	}
@@ -325,8 +355,8 @@ void igReportEnter()
 	tft.fillScreen(ST7735_BLUE);
 	tft.setTextSize(TM_TXT_SIZE+1);
 	tft.setCursor(8, TM_TXT_OFFSET);
-	// text is probably white
-	tft.setTextColor(TM_TXT_FG_COLOR);
+	// text is white
+	tft.setTextColor(ST7735_WHITE);
 	tft.print("REPORT");
 	tft.setTextSize(TM_TXT_SIZE);
 	tft.setCursor(20, 1 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
@@ -346,6 +376,7 @@ void igReportEnter()
 const struct state * igRepCheck()
 {
 	if (joystick_edge_value == JOY_PRESS)
-		return tft_menu_machine(&main_menu);
+		return igThisTest;
+		//return tft_menu_machine(&main_menu);
 	return &igRunReport;
 }

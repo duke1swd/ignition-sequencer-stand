@@ -45,7 +45,7 @@ extern struct state * tft_menu_machine(const struct menu *my_menu);
 #define	TM_AREA_H	(TM_TXT_SPACE * (TM_N_ROWS-1) + TM_TXT_SIZE * 8)
 #define	TM_AREA_W	160
 #define	TM_TXT_BKG_COLOR	ST7735_BLACK
-#define	TM_TXT_FG_COLOR		ST7735_WHITE
-#define	TM_TXT_HIGH_COLOR	ST7735_BLUE
+#define	TM_TXT_FG_COLOR		ST7735_BLUE
+#define	TM_TXT_HIGH_COLOR	ST7735_WHITE
 
 #endif

@@ -7,7 +7,7 @@ const unsigned int * const multi_input_ladders[n_multi_input_ladders] = {
 	joystick_ladder,
 };
 
-const int n_inputs = 8;
+const int n_inputs = 9;
 
 struct input inputs[n_inputs] = {
     {
@@ -24,7 +24,7 @@ struct input inputs[n_inputs] = {
 	0,		// use multi_input_ladder #0
     },
     {
-	"ig pressure",	// name
+	"ig_pressure",	// name
 	2,		// pin
 	multi_input,	// normal input mode
 	multi_input,	// current input mode
@@ -37,7 +37,7 @@ struct input inputs[n_inputs] = {
 	0,		// use multi_input_ladder #0
     },
     {
-	"push 1",	// name
+	"push_1",	// name
 	24,		// pin
 	active_low_pullup,// normal input mode
 	active_low_pullup,// current input mode
@@ -50,7 +50,7 @@ struct input inputs[n_inputs] = {
 	0,		// multi_input_ladder	unused
     },
     {
-	"push 2",	// name
+	"push_2",	// name
 	25,		// pin
 	active_low_pullup,// normal input mode
 	active_low_pullup,// current input mode
@@ -64,7 +64,7 @@ struct input inputs[n_inputs] = {
     },
     {
 	// True when igniter has been safed.
-	"safe igniter",	// name
+	"safe_igniter",	// name
 	22,		// pin
 	active_high_pullup,// normal input mode
 	active_high_pullup,// current input mode
@@ -78,7 +78,7 @@ struct input inputs[n_inputs] = {
     },
     {
 	// True when main has been safed.
-	"safe main",	// name
+	"safe_main",	// name
 	23,		// pin
 	active_high_pullup,// normal input mode
 	active_high_pullup,// current input mode
@@ -91,7 +91,7 @@ struct input inputs[n_inputs] = {
 	0,		// multi_input_ladder	unused
     },
     {
-	"cmd 1",	// name
+	"cmd_1",	// name
 	28,		// pin
 	active_high_in,	// normal input mode
 	active_high_in,	// current input mode
@@ -104,11 +104,24 @@ struct input inputs[n_inputs] = {
 	0,		// multi_input_ladder	unused
     },
     {
-	"cmd 2",	// name
+	"cmd_2",	// name
 	29,		// pin
 	active_high_in,	// normal input mode
 	active_high_in,	// current input mode
 	-1,		// analog_th	must be < 0 for digital pin
+	0,		// analog_hyst	unused
+	0,		// prev_val
+	0,		// current_val
+	0,		// last_change_t
+	0,		// filter_a	unused
+	0,		// multi_input_ladder	unused
+    },
+    {
+    	"power_sense",	// name
+	5,		// analog P5
+	active_high_in,	// normal input mode
+	active_high_in,	// current input mode
+	840,		// analog_th	approximately 4 volts
 	0,		// analog_hyst	unused
 	0,		// prev_val
 	0,		// current_val
@@ -126,12 +139,13 @@ struct input * i_safe_ig = inputs + 4;
 struct input * i_safe_main = inputs + 5;
 struct input * i_cmd_1 = inputs + 6;
 struct input * i_cmd_2 = inputs + 7;
+struct input * i_power_sense = inputs + 8;
 
-const int n_outputs = 7;
+const int n_outputs = 9;
 
 struct output outputs[n_outputs] = {
     {
-    	"IPA Ig Valve",	// name
+    	"IPA_Ig_Valve",	// name
 	3,		// pin
 	active_high_out,// normal output mode
 	active_high_out,// current output mode
@@ -140,7 +154,7 @@ struct output outputs[n_outputs] = {
 	0,		// pulse_t
     },
     {
-    	"N2O Ig Valve",	// name
+    	"N2O_Ig_Valve",	// name
 	4,		// pin
 	active_high_out,// normal output mode
 	active_high_out,// current output mode
@@ -149,7 +163,7 @@ struct output outputs[n_outputs] = {
 	0,		// pulse_t
     },
     {
-    	"GREEN LED",	// name
+    	"GREEN_LED",	// name
 	15,		// pin
 	active_high_out,// normal output mode
 	active_high_out,// current output mode
@@ -158,7 +172,7 @@ struct output outputs[n_outputs] = {
 	0,		// pulse_t
     },
     {
-    	"AMBER LED",	// name
+    	"AMBER_LED",	// name
 	17,		// pin
 	active_high_out,// normal output mode
 	active_high_out,// current output mode
@@ -167,7 +181,7 @@ struct output outputs[n_outputs] = {
 	0,		// pulse_t
     },
     {
-    	"RED LED",	// name
+    	"RED_LED",	// name
 	16,		// pin
 	active_high_out,// normal output mode
 	active_high_out,// current output mode
@@ -176,7 +190,7 @@ struct output outputs[n_outputs] = {
 	0,		// pulse_t
     },
     {
-    	"Power LED",	// name
+    	"Power_LED",	// name
 	14,		// pin
 	active_high_out,// normal output mode
 	active_high_out,// current output mode
@@ -193,6 +207,24 @@ struct output outputs[n_outputs] = {
 	0,		// last_change_t
 	0,		// pulse_t
     },
+    {
+    	"DAQ_0",	// name
+	11,		// pin
+	active_high_out,// normal output mode
+	active_high_out,// current output mode
+	off,		// current state
+	0,		// last_change_t
+	0,		// pulse_t
+    },
+    {
+    	"DAQ_1",	// name
+	10,		// pin
+	active_high_out,// normal output mode
+	active_high_out,// current output mode
+	off,		// current state
+	0,		// last_change_t
+	0,		// pulse_t
+    },
 
 };
 
@@ -203,6 +235,8 @@ struct output * o_amberStatus = outputs + 3;
 struct output * o_redStatus = outputs + 4;
 struct output * o_powerStatus = outputs + 5;
 struct output * o_spark = outputs + 6;
+struct output * o_daq0 = outputs + 7;
+struct output * o_daq1 = outputs + 8;
 
 #define	IPAServoPin	5
 #define	N2OServoPin	6

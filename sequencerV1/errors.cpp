@@ -24,6 +24,7 @@ const char e_msg_3[] PROGMEM = "Sensor F1";	// idle pressure out of range
 const char e_msg_4[] PROGMEM = "No Ignition";	// igniter did not come up to pressure
 const char e_msg_5[] PROGMEM = "Ig P>120";	// Over pressure in igniter
 const char e_msg_6[] PROGMEM = "Sensor F2";	// pressure sensor fault
+const char e_msg_7[] PROGMEM = "No Power";	// External power supply turned off
 
 const char * const error_messages[] PROGMEM = {
 	e_msg_1,
@@ -32,6 +33,7 @@ const char * const error_messages[] PROGMEM = {
 	e_msg_4,
 	e_msg_5,
 	e_msg_6,
+	e_msg_7,
 };
 
 char e_msg[16];
@@ -70,8 +72,8 @@ erEnter()
 	tft.fillScreen(ST7735_RED);
 	tft.setTextSize(TM_TXT_SIZE+1);
 	tft.setCursor(8, TM_TXT_OFFSET);
-	// text is probably white
-	tft.setTextColor(TM_TXT_FG_COLOR);
+	// text is white
+	tft.setTextColor(ST7735_WHITE);
 	tft.print("ERROR");
 	tft.setTextSize(TM_TXT_SIZE);
 	tft.setCursor(20, TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
