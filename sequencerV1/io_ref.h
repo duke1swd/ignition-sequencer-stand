@@ -22,5 +22,5 @@ extern struct output * o_spark;
 extern struct output * o_daq0;
 extern struct output * o_daq1;
 
-#define	IPAServoPin	5
-#define	N2OServoPin	6
+#define	IPAServoPin	6
+#define	N2OServoPin	5

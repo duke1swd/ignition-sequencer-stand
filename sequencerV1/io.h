@@ -238,5 +238,5 @@ struct output * o_spark = outputs + 6;
 struct output * o_daq0 = outputs + 7;
 struct output * o_daq1 = outputs + 8;
 
-#define	IPAServoPin	5
-#define	N2OServoPin	6
+#define	IPAServoPin	6
+#define	N2OServoPin	5

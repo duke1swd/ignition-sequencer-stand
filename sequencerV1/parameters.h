@@ -8,10 +8,10 @@ static const unsigned long spark_period = 5;	// milliseconds.  200 Hz
 
 // open / close positions of main propellant valves, in degrees.
 
-static const int ipa_open = 10;
-static const int ipa_close = ipa_open + 90;
-static const int n2o_open = 10;
-static const int n2o_close = n2o_open + 90;
+static const int ipa_close = 44;
+static const int ipa_open = ipa_close + 90;
+static const int n2o_close = 47;
+static const int n2o_open = n2o_close + 90;
 // these pressure numbers assume a 500 PSI pressure sensor operating at 0.5 to 4.5 volts and a 10 bit DAQ
 static const int min_pressure = 383;	// 0 psi gage, less margin for error
 static const int max_idle_pressure = 436;	// 0 psi gage, plus margin for error
@@ -28,3 +28,5 @@ static const int ig_pressure_time = 500;// how long after spark before we need i
 static const int ig_spark_time = 100;	// how long after ignition (pressure) do we keep spark going
 // note: ig_pressure_grace should be <= ig_spark_time
 static const int ig_pressure_grace = 250;// how long after ignition we start looking for no ignition
+	// no matter what, we are done.
+static const int ig_too_long_time = ig_run_time + ig_pressure_time + 250;

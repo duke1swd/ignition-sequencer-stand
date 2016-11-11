@@ -333,7 +333,7 @@ const struct state * igTestCheck()
 		return error_state(errorIgNoIg);
 
 	// Stop after prescribed run time.
-	if (t > too_long_time || a > ig_run_time) {
+	if (t > ig_too_long_time || a > ig_run_time) {
 		rep_run_time = a;
 		return &igRunReport;
 	}

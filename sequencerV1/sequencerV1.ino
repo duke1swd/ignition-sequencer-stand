@@ -15,7 +15,6 @@
  *  Control is done using Evan's clever state machine software
  *    The state machine software has been modified
  *    - Added a new input type, 'multi-button' to handle the joystick
- *    - Added a new output type, 'servo'
  *
  *  Note that this routine does not interleave TFT display features
  *    in the control loop.  This sequencer does not keep

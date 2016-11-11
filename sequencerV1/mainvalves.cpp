@@ -24,8 +24,8 @@ struct state mainValveTest = { "mainValveTest", &mainValveTestEnter, &mainValveT
 /*
  * Functions to open and close the main valves.
  */
-static Servo N2OServo;
-static Servo IPAServo;
+Servo N2OServo;
+Servo IPAServo;
 
 void mainValveInit()
 {
@@ -126,6 +126,15 @@ static void mainButtonDisplay()
 }
 
 /*
+ * On exit make sure both valves are closed
+ */
+void mainValveTestExit()
+{
+	mainN2OClose();
+	mainIPAClose();
+}
+
+/*
  * Ignition valve click-test
  * On entry, clear screen and write message
  */
@@ -147,15 +156,7 @@ void mainValveTestEnter()
 	ls2 = 0;
 	was_safe = 0;
 	mainButtonDisplay();
-}
-
-/*
- * On exit make sure both valves are closed
- */
-void mainValveTestExit()
-{
-	mainN2OClose();
-	mainIPAClose();
+	mainValveTestExit();	// entry and exit conditions are the same
 }
 
 /*
