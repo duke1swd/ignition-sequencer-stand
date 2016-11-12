@@ -286,6 +286,7 @@ const struct state * igTestCheck()
 	if (!safe_ok())
 		return error_state(errorIgTestSafe);
 
+	// operator abort by power switch
 	if (!power_ok())
 		return error_state(errorIgTestPower);
 
