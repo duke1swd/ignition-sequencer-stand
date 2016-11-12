@@ -25,6 +25,7 @@ const char e_msg_4[] PROGMEM = "No Ignition";	// igniter did not come up to pres
 const char e_msg_5[] PROGMEM = "Ig P>120";	// Over pressure in igniter
 const char e_msg_6[] PROGMEM = "Sensor F2";	// pressure sensor fault
 const char e_msg_7[] PROGMEM = "No Power";	// External power supply turned off
+const char e_msg_8[] PROGMEM = "Flame Out";	// Igniter died prematurely
 
 const char * const error_messages[] PROGMEM = {
 	e_msg_1,
@@ -34,6 +35,7 @@ const char * const error_messages[] PROGMEM = {
 	e_msg_5,
 	e_msg_6,
 	e_msg_7,
+	e_msg_8,
 };
 
 char e_msg[16];

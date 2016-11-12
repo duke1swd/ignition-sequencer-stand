@@ -1,5 +1,5 @@
 /*
- *  This code handles the ignition system test
+ *  This code handles entry into the ignition system test
  */
 
 #include "parameters.h"
@@ -8,24 +8,19 @@
 #include "joystick.h"
 #include "tft_menu.h"
 #include "io_ref.h"
+#include "run.h"
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7735.h> // Hardware-specific library
 
 extern Adafruit_ST7735 tft;
 extern struct menu main_menu;
 
-void igTestEnter();
-void igTestExit();
 void igLRTestEnter();
-void igReportEnter();
 const struct state *igLocalTestEntryCheck();
 const struct state *igRemoteTestEntryCheck();
-const struct state *igTestCheck();
-const struct state *igRepCheck();
 struct state igLocalTestEntry = { "igLocalTest", &igLRTestEnter, NULL, &igLocalTestEntryCheck};
 struct state igRemoteTestEntry = { "igRemoteTest", &igLRTestEnter, NULL, &igRemoteTestEntryCheck};
-struct state igTest = { "igTest", &igTestEnter, &igTestExit, &igTestCheck};
-struct state igRunReport { "igRunRep", &igReportEnter, NULL, igRepCheck};
+extern struct state runStart;
 const struct state *igThisTest;
 //
 // local state of buttons.  Used to optimize display
@@ -35,12 +30,6 @@ static unsigned char ols1;
 static unsigned char ols2;
 static unsigned char was_safe;
 static unsigned char was_power;
-
-static long rep_run_time;
-static long rep_pressure_time;
-static long rep_n_samples;
-static long rep_max_pressure;
-static long rep_sum_pressure;
 
 static bool safe_ok()
 {
@@ -89,7 +78,7 @@ static void igTestDisplay()
 		tft.fillRect(64, 96, 32, 32, TM_TXT_BKG_COLOR);
 		was_safe = 0;
 		was_power = 0;
-		ols1 = ols2 = 2;
+		ols1 = ols2 = 2;	// force redisplay by setting to nonsense value
 	}
 
 	/*
@@ -144,6 +133,7 @@ void igLRTestEnter()
 	was_power = 0;
 	igTestDisplay();
 	igThisTest = current_state;
+	runInit(RUN_IG_ONLY);
 }
 
 /*
@@ -175,7 +165,7 @@ const struct state * igLocalTestEntryCheck()
 	igTestDisplay();
 
 	if (ls1)
-		return &igTest;
+		return &runStart;
 
 	return &igLocalTestEntry;
 }
@@ -205,179 +195,7 @@ const struct state * igRemoteTestEntryCheck()
 	igTestDisplay();
 
 	if (ls1)
-		return &igTest;
+		return &runStart;
 
 	return &igRemoteTestEntry;
-}
-
-/*
- * Run the test here.
- */
-static unsigned long at_pressure_t;
-
-void igTestEnter()
-{
-	rep_run_time = 0;
-	rep_pressure_time = 0;
-	rep_n_samples = 0;
-	rep_max_pressure = 0;
-	rep_sum_pressure = 0;
-	at_pressure_t = 0;
-	igTestExit();
-	o_daq0->cur_state = on;	// goes on at commanded start
-}
-
-/*
- * On exit make sure both valves are closed (off)
- * Kill the signal to the spark generator
- */
-void igTestExit()
-{
-	o_spark->cur_state = off;
-	o_ipaIgValve->cur_state = off;
-	o_n2oIgValve->cur_state = off;
-	o_amberStatus->cur_state = on;
-	o_greenStatus->cur_state = off;
-	o_daq0->cur_state = off;
-	o_daq1->cur_state = off;
-}
-
-/*
- * This routine is the guts of the ignition test sequence.
- * This routine is called from loop().
- */
-
-const struct state * igTestCheck()
-{
-	unsigned long t;
-	unsigned long a;
-	unsigned int p;
-
-	void spark_run();
-
-
-	p = i_ig_pressure->filter_a;
-	if (p > rep_max_pressure)
-		rep_max_pressure = p;
-
-	if (!SENSOR_SANE(p))
-		return error_state(errorPressureInsane);
-
-	// t is how long we've been in this state
-	t = loop_start_t - state_enter_t;
-
-	// a is how long we've been at pressure
-	a = 0;
-	if (at_pressure_t) {
-		rep_n_samples++;
-		rep_sum_pressure += p;
-		a = loop_start_t - at_pressure_t;
-	}
-
-	// check for abort conditions
-
-	// operator abort by remote, button 2, or joystick
-	if (joystick_edge_value == JOY_PRESS ||
-			i_cmd_2->current_val ||
-			i_push_2->current_val)
-		return error_state(errorIgTestAborted);
-
-	// operator abort by safe switch
-	if (!safe_ok())
-		return error_state(errorIgTestSafe);
-
-	// operator abort by power switch
-	if (!power_ok())
-		return error_state(errorIgTestPower);
-
-	// abort if pressure sensor broken
-	if (p < min_pressure)
-		return error_state(errorIgNoPressure);
-
-	// abort if chamber pressure too high
-	if (p > max_ig_pressure)
-		return error_state(errorIgOverPressure);
-
-	// Run spark for ig_spark_time ms after we are at pressure
-	if (at_pressure_t == 0 || a < ig_spark_time)
-		spark_run();
-
-	// Turn on valves at time
-	if (t >= ig_ipa_time)
-		o_ipaIgValve->cur_state = on;
-
-	if (t >= ig_n2o_time)
-		o_n2oIgValve->cur_state = on;
-	
-	// Status lights
-	if (p >= good_pressure) {
-		if (at_pressure_t == 0) {
-			at_pressure_t = loop_start_t;
-			rep_pressure_time = t;
-		}
-		o_amberStatus->cur_state = off;
-		o_greenStatus->cur_state = on;
-		o_daq1->cur_state = on;		// first goes on at first pressure sense
-	} else {
-		o_amberStatus->cur_state = on;
-		o_greenStatus->cur_state = off;
-		// if we've lost pressure, abort to report.
-		if (a > ig_pressure_grace) {
-			rep_run_time = a;
-			return &igRunReport;
-		}
-			
-	}
-
-	// abort if no ignition within time limit
-	if (at_pressure_t == 0 && t > ig_pressure_time && p < good_pressure)
-		return error_state(errorIgNoIg);
-
-	// Stop after prescribed run time.
-	if (t > ig_too_long_time || a > ig_run_time) {
-		rep_run_time = a;
-		return &igRunReport;
-	}
-
-	return &igTest;
-}
-
-/*
- * Put the report on the screen
- * Prints
- *	run time,
- *	time at first pressure
- *	ave pressure
- *	max pressure
- */
-void igReportEnter()
-{
-	// background is Blue
-	tft.fillScreen(ST7735_BLUE);
-	tft.setTextSize(TM_TXT_SIZE+1);
-	tft.setCursor(8, TM_TXT_OFFSET);
-	// text is white
-	tft.setTextColor(ST7735_WHITE);
-	tft.print("REPORT");
-	tft.setTextSize(TM_TXT_SIZE);
-	tft.setCursor(20, 1 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
-	tft.print(rep_run_time);
-	tft.setCursor(0, 2 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
-	tft.print(rep_pressure_time);
-	tft.setCursor(0, 3 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
-	tft.print(rep_max_pressure);
-	tft.setCursor(0, 4 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
-	tft.print(rep_sum_pressure/rep_n_samples);
-}
-
-/*
- * This routine figures out when to stop displaying the status report.
- */
-
-const struct state * igRepCheck()
-{
-	if (joystick_edge_value == JOY_PRESS)
-		return igThisTest;
-		//return tft_menu_machine(&main_menu);
-	return &igRunReport;
 }

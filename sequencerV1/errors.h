@@ -2,7 +2,7 @@
  * Error codes
  */
 
-#define	NUM_ERRORS 6
+#define	NUM_ERRORS 7
 
 const unsigned char error_base = 1;
 const unsigned char errorIgTestAborted =	error_base + 0;		// test aborted by operator
@@ -12,5 +12,6 @@ const unsigned char errorIgNoIg =		error_base + 3;		// no ignition
 const unsigned char errorIgOverPressure =	error_base + 4;		// too much pressure in ignition system
 const unsigned char errorPressureInsane =	error_base + 5;		// pressure sensor broken or not connected
 const unsigned char errorIgTestPower =		error_base + 6;		// test aborted by power switch turning off
+const unsigned char errorIgFlameOut =		error_base + 7;		// lost igniter pressure
 
 extern const struct state * error_state(unsigned char error_code);
