@@ -25,8 +25,6 @@ unsigned char runMode;	// ignition only?  Or whole enchilada?
 /*
  * Report variables
  */
-long rep_run_time;
-long rep_pressure_time;
 long rep_n_samples;
 long rep_max_pressure;
 long rep_sum_pressure;
@@ -68,10 +66,27 @@ static bool power_ok()
 	return i_power_sense->current_val == 1;
 }
 
+static void record_p(unsigned int p)
+{
+	if (p > rep_max_pressure)
+		rep_max_pressure = p;
+	rep_n_samples++;
+	rep_sum_pressure += p;
+
+	if (p >= good_pressure) {
+		o_amberStatus->cur_state = off;
+		o_greenStatus->cur_state = on;
+	} else {
+		o_amberStatus->cur_state = on;
+		o_greenStatus->cur_state = off;
+	}
+}
+
 /*
  * RUN START: sequence up the igniter
  */
-static unsigned long at_pressure_t;
+unsigned long test_start_t;
+unsigned long at_pressure_t;
 
 /*
  * On exit make sure main valves are closed.
@@ -89,30 +104,13 @@ void runMainExit()
  */
 void runStartEnter()
 {
-	rep_run_time = 0;
-	rep_pressure_time = 0;
+	test_start_t = millis();
 	rep_n_samples = 0;
 	rep_max_pressure = 0;
 	rep_sum_pressure = 0;
 	at_pressure_t = 0;
 	runMainExit();
 	o_daq0->cur_state = on;	// goes on at commanded start
-}
-
-static void record_p(unsigned int p)
-{
-	if (p > rep_max_pressure)
-		rep_max_pressure = p;
-	rep_n_samples++;
-	rep_sum_pressure += p;
-
-	if (p >= good_pressure) {
-		o_amberStatus->cur_state = off;
-		o_greenStatus->cur_state = on;
-	} else {
-		o_amberStatus->cur_state = on;
-		o_greenStatus->cur_state = off;
-	}
 }
 
 /*
@@ -183,7 +181,11 @@ const struct state * runStartCheck()
 		return es;
 
 	// t is how long we've been in this state
-	t = loop_start_t - state_enter_t;
+	// On first iteration loop_start_t might be behind test_start_t
+	if (loop_start_t > test_start_t)
+		t = loop_start_t - test_start_t;
+	else
+		t = 0;
 
 	// job of this state is to set 3 conditions at the right time.
 	conditions = 0;
@@ -321,12 +323,15 @@ void igReportEnter()
 	tft.print("REPORT");
 	tft.setTextSize(TM_TXT_SIZE);
 	tft.setCursor(20, 1 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
-	tft.print(rep_run_time);
-	tft.setCursor(0, 2 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
-	tft.print(rep_pressure_time);
-	tft.setCursor(0, 3 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
+	tft.print(loop_start_t - test_start_t);
+	tft.setCursor(20, 2 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
+	if (at_pressure_t)
+		tft.print(loop_start_t - at_pressure_t);
+	else
+		tft.print("none");
+	tft.setCursor(20, 3 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
 	tft.print(rep_max_pressure);
-	tft.setCursor(0, 4 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
+	tft.setCursor(20, 4 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
 	tft.print(rep_sum_pressure/rep_n_samples);
 }
 
