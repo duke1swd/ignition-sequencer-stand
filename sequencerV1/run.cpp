@@ -118,7 +118,12 @@ void runStartEnter()
  * Kill the signal to the spark generator
  *
  * Called on all exits
+ * 
+ * Saves the DAQ output state.  This is used to persist
+ * the output state should we transition to a normal (i.e. not error) state.
  */
+enum output_state l_daq0;
+enum output_state l_daq1;
 void runIgExit()
 {
 	o_spark->cur_state = off;
@@ -126,7 +131,11 @@ void runIgExit()
 	o_n2oIgValve->cur_state = off;
 	o_amberStatus->cur_state = on;
 	o_greenStatus->cur_state = off;
+
+	// save daq state, but turn daq state off in case of error exit
+	l_daq0 = o_daq0->cur_state;
 	o_daq0->cur_state = off;
+	l_daq1 = o_daq1->cur_state;
 	o_daq1->cur_state = off;
 }
 
@@ -213,6 +222,8 @@ void runIgEnter()
 {
 	o_n2oIgValve->cur_state = on;
 	o_ipaIgValve->cur_state = on;
+	o_daq0->cur_state = l_daq0;
+	o_daq1->cur_state = l_daq1;
 }
 
 /*
