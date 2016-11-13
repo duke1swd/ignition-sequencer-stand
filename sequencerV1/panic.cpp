@@ -8,6 +8,7 @@
  */
 
 void panic(const char *msg) {
+    Serial.print("PANIC: ");
     Serial.println(msg);
     digitalWrite(o_redStatus->pin, HIGH);
     digitalWrite(o_powerStatus->pin, LOW);

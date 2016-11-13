@@ -320,19 +320,23 @@ void update_outputs() {
 }
 
 void check_state() {
+  void panic(const char *msg);
   if (current_state->check != NULL) {
     const struct state* new_state = (*(current_state->check))();
+    if (new_state == NULL) panic("null state");
     if (new_state != current_state) {
       if (verbose) {
         Serial.print("Leaving ");
         Serial.print(current_state->name);
-        Serial.print("; Entering ");
-        Serial.println(new_state->name);
       }
       state_end_t = loop_start_t;
       if (current_state->exit != NULL) (*(current_state->exit))();
       current_state = new_state;
       state_enter_t = state_end_t;
+      if (verbose) {
+        Serial.print("; Entering ");
+        Serial.println(new_state->name);
+      }
       if (current_state->enter != NULL) (*(current_state->enter))();
     }
   }

@@ -132,10 +132,12 @@ void runIgExit()
 	o_daq1->cur_state = off;
 }
 
+/*
+ * check for abort conditions
+ */
 const struct state * allAborts()
 {
 	unsigned int p;
-	// check for abort conditions
 
 	// operator abort by remote, button 2, or joystick
 	if (joystick_edge_value == JOY_PRESS ||
@@ -200,7 +202,7 @@ const struct state * runStartCheck()
 
 	// once all three conditions are met, we are done
 	if (conditions >= 3)
-		return NULL;	// this will be runIgPressure
+		return &runIgPress;
 
 	return current_state;
 }
