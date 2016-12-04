@@ -80,6 +80,7 @@ const struct state menu_action_2 = {"MA 2", &menu_led_off, NULL, &menu_check};
 extern struct state igValveTest;	// Note: cannot use extern and const both.  Bug in linker?
 extern struct state rmEchoTest;
 extern struct state localOptoTest;
+extern struct state pressureSensorTest;
 extern struct state sparkTest;
 extern struct state mainValveTest;
 extern struct state igLocalTestEntry;
@@ -96,6 +97,10 @@ const struct menu_item main_menu_items[] = {
   {
      "Spark Test",
      &sparkTest,
+  },
+  {
+     "Pressure Sensor",
+     &pressureSensorTest,
   },
   {
      "Main Valve Test",
