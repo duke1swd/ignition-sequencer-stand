@@ -107,6 +107,7 @@ void localOptoTestEnter()
  * The state machine calls this once per loop().
  * If the joystick has been pressed, then leave the test.
  * Otherwise just record the input state and display it.
+ * Note: If both buttons are pressed, then toggle the DAQ lines at 1 HZ.
  */
 const struct state * localOptoTestCheck()
 {
@@ -114,16 +115,26 @@ const struct state * localOptoTestCheck()
 		return tft_menu_machine(&main_menu);
 
 	ls1 = i_push_1->current_val;
-	if (ls1)
+	ls2 = i_push_2->current_val;
+	if (ls1 && !ls2)
 		o_daq0->cur_state = on;
 	else
 		o_daq0->cur_state = off;
 
-	ls2 = i_push_2->current_val;
-	if (ls2)
+	if (ls2 && !ls1)
 		o_daq1->cur_state = on;
 	else
 		o_daq1->cur_state = off;
+
+	if (ls1 && ls2) {
+		if ((loop_start_t / 500) & 1) {
+			o_daq0->cur_state = on;
+			o_daq1->cur_state = off;
+		} else {
+			o_daq0->cur_state = off;
+			o_daq1->cur_state = on;
+		}
+	}
 
 	localOptoDisplay();
 

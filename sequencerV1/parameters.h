@@ -15,10 +15,11 @@ static const int n2o_open = n2o_close + 90;
 // these pressure numbers assume a 500 PSI pressure sensor operating at 0.5 to 4.5 volts and a 10 bit DAQ
 static const int min_pressure = 383;	// 0 psi gage, less margin for error
 static const int max_idle_pressure = 436;	// 0 psi gage, plus margin for error
-static const int good_pressure = 508;		// 15 psi gage
+//static const int good_pressure = 508;		// 15 psi gage
+static const int good_pressure = 737;		// 50 psi gage
 //static const int max_ig_pressure = 901;		// 75 psi gage
 static const int max_ig_pressure = 1196;		// 120 psi gage
-#define	SENSOR_SANE(x) (((int16_t)(x)) > 90 && ((uint16_t)(x)) < ((uint16_t)1250))
+#define	SENSOR_SANE(x) (((int16_t)(x)) > 90 && ((uint16_t)(x)) < ((uint16_t)2000))
 
 // timing of the ignition test
 static const int ig_run_time = 1000;	// running time after ignition.  In milliseconds.
