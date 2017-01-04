@@ -84,12 +84,17 @@ extern struct state pressureSensorTest;
 extern struct state sparkTest;
 extern struct state mainValveTest;
 extern struct state igLocalTestEntry;
+extern struct state igLocalDebugEntry;
 extern struct state igRemoteTestEntry;
 
 /*
  * Main menu
  */
 const struct menu_item main_menu_items[] = {
+  {
+     "Igniter Debug",
+     &igLocalDebugEntry,
+  },
   {
      "Ig Valve Test",
      &igValveTest,
@@ -189,7 +194,7 @@ const struct state *menu_check()
  */
 void setup() {
   void mainValveInit();
-  void panic(const char *msg);
+  void myPanic(const char *msg);
 
   Serial.begin(9600);
   Serial.print("Build ");
@@ -200,7 +205,7 @@ void setup() {
   setup_outputs();
   digitalWrite(o_powerStatus->pin, HIGH);
   if (!validate_io())
-    panic("Invalid I/O Setup");
+    myPanic("Invalid I/O Setup");
   mainValveInit();
 
   // status LEDs

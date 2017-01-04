@@ -21,6 +21,7 @@ extern void spark_run();
 extern Adafruit_ST7735 tft;
 
 unsigned char runMode;	// ignition only?  Or whole enchilada?
+const struct state *igReturnState;
 
 /*
  * Report variables
@@ -38,9 +39,14 @@ struct state runStart = { "runStart", &runStartEnter, &runIgExit, &runStartCheck
 struct state runIgPress = { "runIgPress", &runIgEnter, &runIgExit, &runIgPressCheck};
 const struct state *runIgRunCheck();
 struct state runIgRun = { "runIgRun", &runIgEnter, &runIgExit, &runIgRunCheck};
+const struct state *runIgDebugCheck();
+struct state runIgDebug = {"runIgDebug", &runStartEnter, &runIgExit, &runIgDebugCheck};
 void igReportEnter();
 const struct state *igRepCheck();
 struct state igRunReport { "igRunRep", &igReportEnter, NULL, igRepCheck};
+void shutdownEnter();
+const struct state *shutdownCheck();
+struct state shutdown { "shutdown", &shutdownEnter, NULL, shutdownCheck};
 
 void runInit(unsigned char mode)
 {
@@ -357,4 +363,74 @@ const struct state * igRepCheck()
 	if (joystick_edge_value == JOY_PRESS)
 		return igThisTest;
 	return &igRunReport;
+}
+
+/*
+ * This routine runs the fixed, 1-second run.
+ */
+const struct state * runIgDebugCheck()
+{
+	unsigned long t;
+	unsigned int p;
+	const struct state *es;
+	extern const struct state *igThisTest;
+
+	// handle aborts
+	es = allAborts();
+	if (es)
+		return es;
+
+	// t is how long we've been in this state
+	t = loop_start_t - state_enter_t;
+
+	if (t >= ig_spark_time && t < ig_spark_off_time)
+		spark_run();
+
+	if (t >= ig_n2o_time)
+		o_n2oIgValve->cur_state = on;
+
+	if (t >= ig_ipa_time)
+		o_ipaIgValve->cur_state = on;
+
+	// p is the filtered pressure (counts * 4)
+	p = i_ig_pressure->filter_a;
+
+	// daq 1 records if good pressure or not.
+	if (p >= good_pressure)
+		o_daq1->cur_state = on;
+	else
+		o_daq1->cur_state = off;
+
+	// Run for a fixed length of time.
+	if (t > ig_run_time) {
+		igReturnState = igThisTest;
+		return &shutdown;
+	}
+	
+	// keep waiting
+	return current_state;
+}
+
+/*
+ * Shutdown state
+ */
+void shutdownEnter()
+{
+	o_ipaIgValve->cur_state = off;
+	o_n2oIgValve->cur_state = off;
+	mainIPAClose();
+	mainN2OClose();
+	o_daq0->cur_state = off;
+	o_daq1->cur_state = off;
+}
+
+const struct state * shutdownCheck()
+{
+	unsigned long t;
+
+	t = loop_start_t - state_enter_t;
+
+	if (t > shutdown_timeout)
+		return igReturnState;
+	return current_state;
 }

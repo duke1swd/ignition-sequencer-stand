@@ -9,13 +9,15 @@
 #include "io_ref.h"
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7735.h> // Hardware-specific library
+#include "sendtodaq.h"
 
 extern Adafruit_ST7735 tft;
 extern struct menu main_menu;
 
 void localOptoTestEnter();
+void localOptoTestExit();
 const struct state *localOptoTestCheck();
-struct state localOptoTest = { "localOptoTest", &localOptoTestEnter, NULL, &localOptoTestCheck};
+struct state localOptoTest = { "localOptoTest", &localOptoTestEnter, localOptoTestExit, &localOptoTestCheck};
 
 // local state of inputs.  Used to optimize display
 static unsigned char ls1;
@@ -139,4 +141,14 @@ const struct state * localOptoTestCheck()
 	localOptoDisplay();
 
 	return &localOptoTest;
+}
+
+void localOptoTestExit()
+{
+	send_som();
+	send_byte(0x55);
+	send_long(0x123);
+	send_long(0x1234);
+	send_long(loop_start_t - state_enter_t);
+	send_eom();
 }

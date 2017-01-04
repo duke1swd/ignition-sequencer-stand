@@ -16,11 +16,14 @@ extern Adafruit_ST7735 tft;
 extern struct menu main_menu;
 
 void igLRTestEnter();
+void igLRDebugEnter();
 const struct state *igLocalTestEntryCheck();
 const struct state *igRemoteTestEntryCheck();
 struct state igLocalTestEntry = { "igLocalTest", &igLRTestEnter, NULL, &igLocalTestEntryCheck};
+struct state igLocalDebugEntry = { "igLocalDebug", &igLRDebugEnter, NULL, &igLocalTestEntryCheck};
 struct state igRemoteTestEntry = { "igRemoteTest", &igLRTestEnter, NULL, &igRemoteTestEntryCheck};
 extern struct state runStart;
+extern struct state runIgDebug;
 const struct state *igThisTest;
 //
 // local state of buttons.  Used to optimize display
@@ -30,6 +33,8 @@ static unsigned char ols1;
 static unsigned char ols2;
 static unsigned char was_safe;
 static unsigned char was_power;
+
+unsigned char igDebug;
 
 static bool safe_ok()
 {
@@ -108,6 +113,15 @@ static void igTestDisplay()
 }
 
 /*
+ * Ignition Debug.  Entry is same as Ignition Test
+ */
+void igLRDebugEnter()
+{
+	igDebug = true;
+	igLRTestEnter();
+}
+
+/*
  * Ignition test
  * On entry, clear screen and write message
  */
@@ -164,8 +178,11 @@ const struct state * igLocalTestEntryCheck()
 
 	igTestDisplay();
 
-	if (ls1)
+	if (ls1) {
+		if (igDebug)
+			return &runIgDebug;
 		return &runStart;
+	}
 
 	return &igLocalTestEntry;
 }
@@ -194,8 +211,11 @@ const struct state * igRemoteTestEntryCheck()
 
 	igTestDisplay();
 
-	if (ls1)
+	if (ls1) {
+		if (igDebug)
+			return &runIgDebug;
 		return &runStart;
+	}
 
 	return &igRemoteTestEntry;
 }

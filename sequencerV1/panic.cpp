@@ -7,7 +7,7 @@
  * Called when software knows it is broken
  */
 
-void panic(const char *msg) {
+void myPanic(const char *msg) {
     Serial.print("PANIC: ");
     Serial.println(msg);
     digitalWrite(o_redStatus->pin, HIGH);

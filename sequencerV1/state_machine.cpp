@@ -320,10 +320,10 @@ void update_outputs() {
 }
 
 void check_state() {
-  void panic(const char *msg);
+  void myPanic(const char *msg);
   if (current_state->check != NULL) {
     const struct state* new_state = (*(current_state->check))();
-    if (new_state == NULL) panic("null state");
+    if (new_state == NULL) myPanic("null state");
     if (new_state != current_state) {
       if (verbose) {
         Serial.print("Leaving ");

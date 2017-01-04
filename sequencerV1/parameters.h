@@ -22,13 +22,16 @@ static const int max_ig_pressure = 1196;		// 120 psi gage
 #define	SENSOR_SANE(x) (((int16_t)(x)) > 90 && ((uint16_t)(x)) < ((uint16_t)2000))
 
 // timing of the ignition test
-static const int ig_run_time = 1000;	// running time after ignition.  In milliseconds.
-static const int ig_ipa_time = 10;	// when do we start IPA?
-static const int ig_n2o_time = 10;	// when do we start N2O?
-static const int ig_spark_time = 0;	// when do we start spark?
+static const int ig_run_time = 1100;	// running time after ignition.  In milliseconds.
+static const int ig_ipa_time = 100;	// when do we start IPA?
+static const int ig_n2o_time = 0;	// when do we start N2O?
+static const int ig_spark_time = 100;	// when do we start spark?
+static const int ig_spark_off_time = 600; // in debug, when to stop spark
 static const int ig_pressure_time = 500;// how long after spark before we need ignition
 static const int ig_spark_cont_time = 100;// how long after ignition (pressure) do we keep spark going
 // note: ig_pressure_grace should be >= ig_spark_cont_time
 static const int ig_pressure_grace = 250;// how long after ignition we start looking for no ignition
 	// no matter what, we are done.
 static const int ig_too_long_time = ig_run_time + ig_pressure_time + 250;
+
+static const int shutdown_timeout = 500;
