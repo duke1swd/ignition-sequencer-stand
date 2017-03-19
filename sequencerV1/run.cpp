@@ -300,6 +300,8 @@ const struct state * runIgRunCheck()
 	// keep spark going for awhile after pressure comes up
 	if (t <= ig_spark_cont_time)
 		spark_run();
+	else
+		o_spark->cur_state = off;
 
 	// if we are within pressure grace period keep running
 	if (t <= ig_pressure_grace)
