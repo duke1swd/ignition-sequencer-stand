@@ -31,8 +31,6 @@ static const int ig_pressure_time = 500;// how long after spark before we need i
 static const int ig_spark_cont_time = 100;// how long after ignition (pressure) do we keep spark going
 // note: ig_pressure_grace should be >= ig_spark_cont_time
 static const int ig_pressure_grace = 250;// how long after ignition we start looking for no ignition
-	// no matter what, we are done.
-static const int ig_too_long_time = ig_run_time + ig_pressure_time + 250;
 
 static const int shutdown_timeout = 500;
 
