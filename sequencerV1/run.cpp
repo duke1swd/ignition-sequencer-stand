@@ -1,6 +1,45 @@
 /*
  * This code handles sequencing for engine operations.
  * Two modes, ignition test, and full burn
+ *
+ * States used in this module
+ * 	runStart
+ * 		This state is purely time driven.  It turns on the spark, IPA,
+ * 		and N2O at the right time.  Once all three are on we switch to
+ * 		runIgPressCheck.
+ *
+ * 		Note: exit from this state shuts down the igniter.  If we exit
+ * 		to a state that still wants the igniter on then that state's
+ * 		start routine will turn it back on.  The state machine makes
+ * 		sure there are no output glitches as a result of this technique.
+ *
+ * 	runIgPress
+ * 		Run the igniter until eitther too much time has past (error)
+ * 		or the igniter chamber pressure comes up to nominal.
+ *
+ * 	runIgRun
+ * 		This state runs for a fixed period of time.  Somewhere along
+ * 		the way it turns off the spark.  If the igniter is still
+ * 		at pressure at the end of the time we either transition to motor
+ * 		run or we are done with the igniter test.
+ *
+ * 	igRunReport
+ * 		This state displays a test report on the screen until any button
+ * 		is pressed.  This is the normal exit from runIgRun when not
+ * 		exiting to main motor run state.
+ *
+ * 	runIgDebug
+ * 		This state runs the entire igniter sequence on a fixed set
+ * 		of timings.
+ *
+ * 	shutdown
+ * 		Turns off ig and main valves, waits a while, then exits
+ * 		This is the normal exit from runIgDebug.
+ *
+ * 	igThisTest
+ * 		This variable contains a pointer to the test entry state.
+ * 		Ignition tests eventually exit to this state, saving on
+ * 		menu clicking when repeated igntion tests are being run.
  */
 
 #include "parameters.h"
@@ -182,7 +221,7 @@ const struct state * allAborts()
 
 /*
  * Sequence up the igniter.
- * The move to run runIgPressure
+ * Then move to run runIgPressure
  */
 const struct state * runStartCheck()
 {
@@ -258,7 +297,9 @@ const struct state * runIgPressCheck()
 	if (p >= good_pressure) {
 		// record when we first came up to pressure
 		at_pressure_t = loop_start_t;
+#ifdef DAQ1PRESSURE
 		o_daq1->cur_state = on;		// goes on at first good pressure sense
+#endif
 		// record pressure for run reporting
 		record_p(p);
 		return &runIgRun;
@@ -397,11 +438,13 @@ const struct state * runIgDebugCheck()
 	// p is the filtered pressure (counts * 4)
 	p = i_ig_pressure->filter_a;
 
+#ifdef DAQ1PRESSURE
 	// daq 1 records if good pressure or not.
 	if (p >= good_pressure)
 		o_daq1->cur_state = on;
 	else
 		o_daq1->cur_state = off;
+#endif
 
 	// Run for a fixed length of time.
 	if (t > ig_run_time) {

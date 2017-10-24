@@ -1,0 +1,9 @@
+Long igniter test sequence
+Main engine sequence
+Support for main chamber pressure sensor
+Low order 2 bits of state on DAQ lines
+State log
+dump state log to DAQ
+support for SD card
+state log to SD card
+blink failure codes on RED led, visible to camera
