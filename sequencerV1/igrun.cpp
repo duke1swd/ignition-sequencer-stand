@@ -17,11 +17,17 @@ extern struct menu main_menu;
 
 void igLRTestEnter();
 void igLRDebugEnter();
+void igLongTestEnter();
+void igLongTestRunEnter();
 const struct state *igLocalTestEntryCheck();
 const struct state *igRemoteTestEntryCheck();
+const struct state *igLongTestEntryCheck();
+const struct state *igLongTestRunCheck();
 struct state igLocalTestEntry = { "igLocalTest", &igLRTestEnter, NULL, &igLocalTestEntryCheck};
 struct state igLocalDebugEntry = { "igLocalDebug", &igLRDebugEnter, NULL, &igLocalTestEntryCheck};
 struct state igRemoteTestEntry = { "igRemoteTest", &igLRTestEnter, NULL, &igRemoteTestEntryCheck};
+struct state igLongTestEntry = { "igLongTestEnter", &igLongTestEnter, NULL, &igLongTestEntryCheck};
+struct state igLongTestRun = { "igLongTestRun", &igLongTestRunEnter, NULL, &igLongTestRunCheck};
 extern struct state runStart;
 extern struct state runIgDebug;
 const struct state *igThisTest;
@@ -35,6 +41,8 @@ static unsigned char was_safe;
 static unsigned char was_power;
 
 unsigned char igDebug;
+static char* testname;
+void common_test_enter();
 
 static bool safe_ok()
 {
@@ -117,7 +125,6 @@ static void igTestDisplay()
  */
 void igLRDebugEnter()
 {
-	igDebug = true;
 	igLRTestEnter();
 }
 
@@ -127,13 +134,21 @@ void igLRDebugEnter()
  */
 void igLRTestEnter()
 {
+	testname = "IGNITION";
+	common_test_enter();
+	igDebug = false;
+}
+
+void common_test_enter()
+{
 	extern const struct state * current_state;
 
+	igDebug = true;
 	tft.fillScreen(TM_TXT_BKG_COLOR);
 	tft.setTextSize(TM_TXT_SIZE+1);
 	tft.setCursor(8, TM_TXT_OFFSET);
 	tft.setTextColor(TM_TXT_HIGH_COLOR);
-	tft.print("IGNITION");
+	tft.print(testname);
 	tft.setTextSize(TM_TXT_SIZE);
 	tft.setCursor(20, TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
 	tft.setTextColor(TM_TXT_FG_COLOR);
@@ -218,4 +233,106 @@ const struct state * igRemoteTestEntryCheck()
 	}
 
 	return &igRemoteTestEntry;
+}
+
+/*
+ * Code to handle the long test
+ */
+
+#define	N_TESTS		7	// number of iterations
+#define	TIME_BETWEEN	10000	// 10 seconds in milliseconds
+static char test_count;
+
+/*
+ * Long Ignition test
+ * On entry, clear screen and write message
+ */
+void igLongTestEnter()
+{
+	testname = "IG LONG";
+	test_count = 0;
+	common_test_enter();
+}
+
+/*
+ * The state machine calls one of these once per loop().
+ * If the joystick has been pressed, then leave the test.
+ * Otherwise capture inputs and wait for test to start
+ * This test can be run by either remote or local buttons.
+ */
+const struct state * igLongTestEntryCheck()
+{
+	unsigned char e;
+	unsigned int p;
+
+	p = i_ig_pressure->filter_a;
+	if (!SENSOR_SANE(p))
+		return error_state(errorPressureInsane);
+
+	if (p < min_pressure || p > max_idle_pressure)
+		return error_state(errorIgNoPressure);
+
+	if (joystick_edge_value == JOY_PRESS)
+		return tft_menu_machine(&main_menu);
+
+	if (safe_ok() && power_ok()) {
+		ls1 = (i_push_1->current_val || i_cmd_1->current_val);
+		ls2 = (i_push_2->current_val || i_cmd_2->current_val);
+	} else
+		ls1 = 0;
+
+	igTestDisplay();
+
+	if (ls1)
+		return &igLongTestRun;
+
+	return &igLongTestEntry;
+}
+
+/*
+ * This state runs the test over and over again.
+ */
+void igLongTestRunEnter()
+{
+	extern const struct state * current_state;
+	igThisTest = current_state;
+
+	test_count++;
+	
+	// erase the screen
+	tft.fillScreen(TM_TXT_BKG_COLOR);
+	if (test_count > N_TESTS)
+		return;
+
+	// Display test number
+	tft.setTextSize(TM_TXT_SIZE+2);
+	tft.setCursor(16, TM_TXT_OFFSET);
+	tft.setTextColor(TM_TXT_HIGH_COLOR);
+	tft.print((int)test_count);
+	tft.setTextSize(TM_TXT_SIZE);
+}
+
+const struct state * igLongTestRunCheck()
+{
+	unsigned long t;
+
+	t = loop_start_t - state_enter_t;
+	if (loop_start_t < state_enter_t)
+		t = 0;
+
+	// If joystick, or button 2, return to menu system.
+	if (joystick_edge_value == JOY_PRESS ||
+	    i_push_2->current_val ||
+	    i_cmd_2->current_val)
+		return tft_menu_machine(&main_menu);
+
+	// If we have done all the tests then go back to entry state
+	if (test_count > N_TESTS)
+		return &igLongTestEntry;
+	
+	// If the waiting period is over, then run the next test.
+	if (test_count == 1 || t > TIME_BETWEEN)
+		return &runIgDebug;
+
+	return current_state;
 }

@@ -52,6 +52,8 @@
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7735.h> // Hardware-specific library
 
+#define	DAQ1PRESSURE	1    // put state of pressure sensor on daq1 line.
+
 extern void mainIPAOpen();
 extern void mainIPAClose();
 extern void mainN2OOpen();
