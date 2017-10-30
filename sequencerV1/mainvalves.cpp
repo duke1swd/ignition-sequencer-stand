@@ -21,6 +21,8 @@ void mainValveTestExit();
 const struct state *mainValveTestCheck();
 struct state mainValveTest = { "mainValveTest", &mainValveTestEnter, &mainValveTestExit, &mainValveTestCheck};
 
+static bool valveTestMode;
+
 /*
  * Functions to open and close the main valves.
  */
@@ -31,25 +33,34 @@ void mainValveInit()
 {
 	N2OServo.attach(N2OServoPin);
 	IPAServo.attach(IPAServoPin);
+	valveTestMode = false;
 }
 
 void mainIPAOpen()
 {
+	if (valveTestMode)
+		o_daq1->cur_state = on;
 	IPAServo.write(ipa_open);
 }
 
 void mainIPAClose()
 {
+	if (valveTestMode)
+		o_daq1->cur_state = off;
 	IPAServo.write(ipa_close);
 }
 
 void mainN2OOpen()
 {
+	if (valveTestMode)
+		o_daq0->cur_state = on;
 	N2OServo.write(n2o_open);
 }
 
 void mainN2OClose()
 {
+	if (valveTestMode)
+		o_daq0->cur_state = off;
 	N2OServo.write(n2o_close);
 }
 
@@ -132,6 +143,7 @@ void mainValveTestExit()
 {
 	mainN2OClose();
 	mainIPAClose();
+	valveTestMode = false;
 }
 
 /*
@@ -156,7 +168,9 @@ void mainValveTestEnter()
 	ls2 = 0;
 	was_safe = 0;
 	mainButtonDisplay();
+	valveTestMode = true;	// set true before exit to make sure DAQ lines are low on entry.
 	mainValveTestExit();	// entry and exit conditions are the same
+	valveTestMode = true;	// exit routine sets this false.
 }
 
 /*
