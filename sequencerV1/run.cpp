@@ -62,7 +62,6 @@ extern void spark_run();
 extern Adafruit_ST7735 tft;
 
 unsigned char runMode;	// ignition only?  Or whole enchilada?
-const struct state *igReturnState;
 
 /*
  * Report variables
@@ -418,7 +417,6 @@ const struct state * runIgDebugCheck()
 	unsigned long t;
 	unsigned int p;
 	const struct state *es;
-	extern const struct state *igThisTest;
 
 	// handle aborts
 	es = allAborts();
@@ -449,10 +447,8 @@ const struct state * runIgDebugCheck()
 #endif
 
 	// Run for a fixed length of time.
-	if (t > ig_run_time) {
-		igReturnState = igThisTest;
+	if (t > ig_run_time)
 		return &shutdown;
-	}
 	
 	// keep waiting
 	return current_state;
@@ -474,10 +470,11 @@ void shutdownEnter()
 const struct state * shutdownCheck()
 {
 	unsigned long t;
+	extern const struct state *igThisTest;
 
 	t = loop_start_t - state_enter_t;
 
 	if (t > shutdown_timeout)
-		return igReturnState;
+		return igThisTest;
 	return current_state;
 }
