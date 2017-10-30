@@ -121,24 +121,28 @@ static void igTestDisplay()
 }
 
 /*
- * Ignition Debug.  Entry is same as Ignition Test
+ * Ignition Debug.
  */
 void igLRDebugEnter()
 {
-	igLRTestEnter();
+	testname = "IGNITION";
+	igDebug = true;
+	common_test_enter();
 }
 
 /*
  * Ignition test
- * On entry, clear screen and write message
  */
 void igLRTestEnter()
 {
 	testname = "IGNITION";
+	igDebug = true;
 	common_test_enter();
-	igDebug = false;
 }
 
+/*
+ * On ignition test entry, clear screen and write message
+ */
 void common_test_enter()
 {
 	extern const struct state * current_state;
