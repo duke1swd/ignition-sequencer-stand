@@ -72,11 +72,6 @@ Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
  * This is where the bulk of the interesting code lies.
  */
 
-void menu_led_on();
-void menu_led_off();
-const struct state *menu_check();
-const struct state menu_action_1 = {"MA 1", &menu_led_on, NULL, &menu_check};
-const struct state menu_action_2 = {"MA 2", &menu_led_off, NULL, &menu_check};
 extern struct state igValveTest;	// Note: cannot use extern and const both.  Bug in linker?
 extern struct state rmEchoTest;
 extern struct state localOptoTest;
@@ -139,7 +134,7 @@ const struct menu_item main_menu_items[] = {
   },
   {
      "Main Sequence",
-     &menu_action_2
+     NULL,
   },
 };
 
@@ -151,19 +146,6 @@ struct menu main_menu = {
 const struct state *check_startup()
 {
   return tft_menu_machine(&main_menu);
-}
-
-/*
- * On entering a menu state we should do something.
- * But  what?
- */
-void menu_led_on()
-{
-	// clear the screen and write something
-}
-
-void menu_led_off()
-{
 }
 
 /*
@@ -187,14 +169,6 @@ static void joystick_edge_trigger()
 		joystick_edge_value = JOY_NONE;
 	else
 		joystick_old_value = joystick_edge_value;
-}
-
-/*
- * For now, the only thing we do in a menu state is flip back to the menu system.
- */
-const struct state *menu_check()
-{
-  return tft_menu_machine(&main_menu);
 }
 
 /*
