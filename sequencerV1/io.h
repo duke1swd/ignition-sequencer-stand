@@ -93,8 +93,8 @@ struct input inputs[n_inputs] = {
     {
 	"cmd_1",	// name
 	28,		// pin
-	active_high_in,	// normal input mode
-	active_high_in,	// current input mode
+	active_low_in,	// normal input mode
+	active_low_in,	// current input mode
 	-1,		// analog_th	must be < 0 for digital pin
 	0,		// analog_hyst	unused
 	0,		// prev_val
@@ -106,8 +106,8 @@ struct input inputs[n_inputs] = {
     {
 	"cmd_2",	// name
 	29,		// pin
-	active_high_in,	// normal input mode
-	active_high_in,	// current input mode
+	active_low_in,	// normal input mode
+	active_low_in,	// current input mode
 	-1,		// analog_th	must be < 0 for digital pin
 	0,		// analog_hyst	unused
 	0,		// prev_val
