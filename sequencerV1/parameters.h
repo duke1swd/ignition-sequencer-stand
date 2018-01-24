@@ -7,11 +7,12 @@ typedef int int16_t;
 static const unsigned long spark_period = 25;	// milliseconds.  40 Hz
 
 // open / close positions of main propellant valves, in degrees.
+#define SERVO_OPEN 90
 
 static const int ipa_close = 44;
-static const int ipa_open = ipa_close + 90;
+static const int ipa_open = ipa_close + SERVO_OPEN;
 static const int n2o_close = 47;
-static const int n2o_open = n2o_close + 90;
+static const int n2o_open = n2o_close + SERVO_OPEN;
 // these pressure numbers assume a 500 PSI pressure sensor operating at 0.5 to 4.5 volts and a 10 bit DAQ
 static const int min_pressure = 375;	// 0 psi gage, less margin for error
 static const int max_idle_pressure = 436;	// 0 psi gage, plus margin for error

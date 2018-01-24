@@ -143,6 +143,8 @@ void mainValveTestExit()
 {
 	mainN2OClose();
 	mainIPAClose();
+	o_daq0->cur_state = off;
+	o_daq1->cur_state = off;
 	valveTestMode = false;
 }
 
@@ -152,6 +154,8 @@ void mainValveTestExit()
  */
 void mainValveTestEnter()
 {
+	o_daq0->cur_state = off;
+	o_daq1->cur_state = off;
 	tft.fillScreen(TM_TXT_BKG_COLOR);
 	tft.setTextSize(TM_TXT_SIZE+1);
 	tft.setCursor(2, TM_TXT_OFFSET);
@@ -186,14 +190,19 @@ const struct state * mainValveTestCheck()
 	if (safe_ok()) {
 		ls1 = i_push_1->current_val;
 		ls2 = i_push_2->current_val;
-		if (ls1 && !ols1)
+		if (ls1 && !ols1) {
+			o_daq0->cur_state = on;
 			mainIPAOpen();
-		if (ls2 && !ols2)
+		} if (ls2 && !ols2) {
+			o_daq1->cur_state = on;
 			mainN2OOpen();
-		if (!ls1 && ols1)
+		} if (!ls1 && ols1) {
+			o_daq0->cur_state = off;
 			mainIPAClose();
-		if (!ls2 && ols2)
+		} if (!ls2 && ols2) {
+			o_daq1->cur_state = off;
 			mainN2OClose();
+		}
 	}
 	mainButtonDisplay();
 

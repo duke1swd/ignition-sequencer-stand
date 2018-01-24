@@ -7,3 +7,8 @@ dump state log to DAQ
 support for SD card
 state log to SD card
 blink failure codes on RED led, visible to camera
+
+
+BUGS:
+If you unsafe the servos in main menu, the IPA servo opens a bit
+If you unsafe anything in main menu, you should get a SAFE error
