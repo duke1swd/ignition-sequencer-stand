@@ -21,6 +21,7 @@ extern struct output * o_powerStatus;
 extern struct output * o_spark;
 extern struct output * o_daq0;
 extern struct output * o_daq1;
+extern struct output * o_testled;
 
 #define	IPAServoPin	6
 #define	N2OServoPin	5

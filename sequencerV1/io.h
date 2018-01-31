@@ -141,7 +141,7 @@ struct input * i_cmd_1 = inputs + 6;
 struct input * i_cmd_2 = inputs + 7;
 struct input * i_power_sense = inputs + 8;
 
-const int n_outputs = 9;
+const int n_outputs = 10;
 
 struct output outputs[n_outputs] = {
     {
@@ -225,6 +225,15 @@ struct output outputs[n_outputs] = {
 	0,		// last_change_t
 	0,		// pulse_t
     },
+    {
+    	"TESTLED",	// name
+	12,		// pin
+	active_high_out,// normal output mode
+	active_high_out,// current output mode
+	off,		// current state
+	0,		// last_change_t
+	100,		// pulse_t
+    },
 
 };
 
@@ -237,6 +246,7 @@ struct output * o_powerStatus = outputs + 5;
 struct output * o_spark = outputs + 6;
 struct output * o_daq0 = outputs + 7;
 struct output * o_daq1 = outputs + 8;
+struct output * o_testled = outputs + 9;
 
 #define	IPAServoPin	6
 #define	N2OServoPin	5

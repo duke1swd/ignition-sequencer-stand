@@ -13,6 +13,8 @@
 #include <Adafruit_ST7735.h> // Hardware-specific library
 #include <Servo.h>
 
+//#define	TS_HACK			// run the servos in parallel.  Used for testing servo slew rates
+
 extern Adafruit_ST7735 tft;
 extern struct menu main_menu;
 
@@ -29,39 +31,65 @@ static bool valveTestMode;
 Servo N2OServo;
 Servo IPAServo;
 
-void mainValveInit()
-{
-	N2OServo.attach(N2OServoPin);
-	IPAServo.attach(IPAServoPin);
-	valveTestMode = false;
-}
-
 void mainIPAOpen()
 {
-	if (valveTestMode)
+	if (valveTestMode) {
 		o_daq1->cur_state = on;
+		o_testled->cur_state = single_on;
+#ifdef TS_HACK
+		N2OServo.write(n2o_open);
+#endif
+	}
 	IPAServo.write(ipa_open);
 }
 
 void mainIPAClose()
 {
-	if (valveTestMode)
+	if (valveTestMode) {
 		o_daq1->cur_state = off;
+		o_testled->cur_state = single_on;
+#ifdef TS_HACK
+		N2OServo.write(n2o_close);
+#endif
+	}
 	IPAServo.write(ipa_close);
 }
 
 void mainN2OOpen()
 {
-	if (valveTestMode)
+	if (valveTestMode) {
 		o_daq0->cur_state = on;
+		o_testled->cur_state = single_on;
+#ifdef TS_HACK
+		N2OServo.write(ipa_open);
+#endif
+	}
 	N2OServo.write(n2o_open);
 }
 
 void mainN2OClose()
 {
-	if (valveTestMode)
+	if (valveTestMode) {
 		o_daq0->cur_state = off;
+		o_testled->cur_state = single_on;
+#ifdef TS_HACK
+		N2OServo.write(ipa_close);
+#endif
+	}
 	N2OServo.write(n2o_close);
+}
+
+/*
+ * Init in the valves in closed state
+ */
+void mainValveInit()
+{
+	valveTestMode = false;
+	N2OServo.attach(N2OServoPin);
+	mainN2OClose();
+
+	IPAServo.attach(IPAServoPin);
+	mainIPAClose();
 }
 
 /*

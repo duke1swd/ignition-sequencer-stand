@@ -450,10 +450,13 @@ void update_output(output* out) {
       break;
     case single_on:
     case single_off:
+      if (out->last_change_t == 0) {
+        out->last_change_t = loop_start_t;
+      }
       if (out->last_change_t + out->p.pulse_t < loop_start_t) {
         out->cur_state = (out->cur_state == single_on) ? off : on;
         digitalWrite(out->pin, (m != active_low_out) == (out->cur_state != on));
-        out->last_change_t = loop_start_t;
+        out->last_change_t = 0;
       } else {
         digitalWrite(out->pin, (m != active_low_out) == (out->cur_state != single_on));
       }
