@@ -11,6 +11,7 @@ extern struct input * i_safe_main;
 extern struct input * i_cmd_1;
 extern struct input * i_cmd_2;
 extern struct input * i_power_sense;
+extern struct input * i_main_press;
 
 extern struct output * o_ipaIgValve;
 extern struct output * o_n2oIgValve;

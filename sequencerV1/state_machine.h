@@ -91,7 +91,7 @@ enum output_state {
 	servo_controlled,
 };
 
-#define ANALOG_FILTER_TIME 16
+#define ANALOG_FILTER_TIME 8
 #define ANALOG_FILTER_SCALE 4
 
 struct input {

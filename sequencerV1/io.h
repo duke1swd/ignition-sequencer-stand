@@ -7,7 +7,7 @@ const unsigned int * const multi_input_ladders[n_multi_input_ladders] = {
 	joystick_ladder,
 };
 
-const int n_inputs = 9;
+const int n_inputs = 10;
 
 struct input inputs[n_inputs] = {
     {
@@ -129,6 +129,19 @@ struct input inputs[n_inputs] = {
 	0,		// filter_a	unused
 	0,		// multi_input_ladder	unused
     },
+    {
+	"main_press",	// name
+	1,		// pin
+	multi_input,	// normal input mode
+	multi_input,	// current input mode
+	0,		// analog_th.  Must be >=0 for analog pin
+	0,		// analog_hyst
+	0,		// prev_val
+	0,		// current_val
+	0,		// last_change_t
+	0,		// filter_a
+	0,		// use multi_input_ladder #0
+    },
 };
 
 struct input * i_joystick = inputs + 0;
@@ -140,6 +153,7 @@ struct input * i_safe_main = inputs + 5;
 struct input * i_cmd_1 = inputs + 6;
 struct input * i_cmd_2 = inputs + 7;
 struct input * i_power_sense = inputs + 8;
+struct input * i_main_press = inputs + 9;
 
 const int n_outputs = 10;
 
