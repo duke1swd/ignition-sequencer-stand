@@ -20,7 +20,7 @@ static const int max_idle_pressure = 436;	// 0 psi gage, plus margin for error
 static const int good_pressure = 737;		// 50 psi gage
 //static const int max_ig_pressure = 901;		// 75 psi gage
 static const int max_ig_pressure = 1196;		// 120 psi gage
-#define	SENSOR_SANE(x) (((int16_t)(x)) > 90 && ((uint16_t)(x)) < ((uint16_t)2000))
+#define	SENSOR_SANE(x) (((int16_t)(x)) > 90 && ((uint16_t)(x)) < ((uint16_t)4000))
 
 // timing of the ignition test
 static const int ig_run_time = 1200;	// running time after ignition.  In milliseconds.

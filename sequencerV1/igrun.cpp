@@ -41,7 +41,7 @@ static unsigned char was_safe;
 static unsigned char was_power;
 
 unsigned char igDebug;
-static char* testname;
+static const char* testname;
 void common_test_enter();
 
 static bool safe_ok()
@@ -176,12 +176,11 @@ void common_test_enter()
  */
 const struct state * igLocalTestEntryCheck()
 {
-	unsigned char e;
 	unsigned int p;
 
 	p = i_ig_pressure->filter_a;
 	if (!SENSOR_SANE(p))
-		return error_state(errorPressureInsane);
+		return error_state(errorIgPressureInsane);
 
 	if (p < min_pressure || p > max_idle_pressure)
 		return error_state(errorIgNoPressure);
@@ -208,12 +207,11 @@ const struct state * igLocalTestEntryCheck()
 
 const struct state * igRemoteTestEntryCheck()
 {
-	unsigned char e;
 	unsigned int p;
 
 	p = i_ig_pressure->filter_a;
 	if (!SENSOR_SANE(p))
-		return error_state(errorPressureInsane);
+		return error_state(errorIgPressureInsane);
 
 
 	if (p < min_pressure || p > max_idle_pressure)
@@ -266,12 +264,11 @@ void igLongTestEnter()
  */
 const struct state * igLongTestEntryCheck()
 {
-	unsigned char e;
 	unsigned int p;
 
 	p = i_ig_pressure->filter_a;
 	if (!SENSOR_SANE(p))
-		return error_state(errorPressureInsane);
+		return error_state(errorIgPressureInsane);
 
 	if (p < min_pressure || p > max_idle_pressure)
 		return error_state(errorIgNoPressure);

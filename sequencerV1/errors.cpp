@@ -8,9 +8,13 @@
 #include "joystick.h"
 #include "tft_menu.h"
 #include "io_ref.h"
+#include "run.h"
+#include "events.h"
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7735.h> // Hardware-specific library
 #include <avr/pgmspace.h>    // used to hold text strings in program space.
+
+extern unsigned char runMode;
 
 /*
  * These are the text error messages.
@@ -18,16 +22,22 @@
  * Bad things happen if these messages are longer than 15 characters
  */
 //                             |xxx xxx xxx xxx|
-const char e_msg_1[] PROGMEM = "Oper Abrt";	// test aborted by operator
-const char e_msg_2[] PROGMEM = "SAFE Abrt";	// test aborted by safe switch
-const char e_msg_3[] PROGMEM = "Sensor F1";	// idle pressure out of range
-const char e_msg_4[] PROGMEM = "No Ignition";	// igniter did not come up to pressure
-const char e_msg_5[] PROGMEM = "Ig P>120";	// Over pressure in igniter
-const char e_msg_6[] PROGMEM = "Sensor F2";	// pressure sensor fault
-const char e_msg_7[] PROGMEM = "No Power";	// External power supply turned off
-const char e_msg_8[] PROGMEM = "Flame Out";	// Igniter died prematurely
+const char e_msg_0[]  PROGMEM = "Oper Abrt";		// test aborted by operator
+const char e_msg_1[]  PROGMEM = "SAFE Abrt";		// test aborted by safe switch
+const char e_msg_2[]  PROGMEM = "Ig Sensor Range";	// idle pressure out of range
+const char e_msg_3[]  PROGMEM = "No Ignition";		// igniter did not come up to pressure
+const char e_msg_4[]  PROGMEM = "Ig P>120";		// Over pressure in igniter
+const char e_msg_5[]  PROGMEM = "Ig Sensor Fault";	// pressure sensor fault
+const char e_msg_6[]  PROGMEM = "No Power";		// External power supply turned off
+const char e_msg_7[]  PROGMEM = "Flame Out";		// Igniter died prematurely
+const char e_msg_8[]  PROGMEM = "Mn Sensor Range";	// Main sensor out of range
+const char e_msg_9[]  PROGMEM = "Mn Sesnor Fault";	// Main sensor missing or broken
+const char e_msg_10[] PROGMEM = "Seq Op Abort";		// Operator abort of main sequence
+const char e_msg_11[] PROGMEM = "Seq Abort Safe";	// Main sequence abort on safe switch
+const char e_msg_12[] PROGMEM = "Seq Abort Power";	// Main seqeucne abort on power switch
 
 const char * const error_messages[] PROGMEM = {
+	e_msg_0,
 	e_msg_1,
 	e_msg_2,
 	e_msg_3,
@@ -36,6 +46,10 @@ const char * const error_messages[] PROGMEM = {
 	e_msg_6,
 	e_msg_7,
 	e_msg_8,
+	e_msg_9,
+	e_msg_10,
+	e_msg_11,
+	e_msg_12,
 };
 
 char e_msg[16];
@@ -48,6 +62,8 @@ void erEnter();
 void erExit();
 const struct state *erCheck();
 struct state l_error_state = { "error display", &erEnter, &erExit, &erCheck};
+
+static int next_event_to_daq;
 
 /*
  * Called by a check routine.  Saves the
@@ -66,9 +82,17 @@ const struct state *error_state(unsigned char code)
 void
 erEnter()
 {
+	next_event_to_daq = 0;
+
 	o_redStatus->cur_state = on;
 	o_amberStatus->cur_state = off;
 	o_greenStatus->cur_state = off;
+
+	o_daq0->cur_state = off;
+	if (runMode == RUN_MAIN_ENGINE)
+		o_daq0->cur_state = on;
+	else
+		o_daq1->cur_state = off;
 
 	// background is RED
 	tft.fillScreen(ST7735_RED);
@@ -95,11 +119,23 @@ erExit()
 	// normal run states have amber on, other LEDs off.
 	o_redStatus->cur_state = off;
 	o_amberStatus->cur_state = on;
+	o_greenStatus->cur_state = off;
+	o_daq1->cur_state = off;
 }
 
+/*
+ * Dump the event log to daq
+ * Wait for joystick press.
+ */
 const struct state * erCheck()
 {
-	if (joystick_edge_value == JOY_PRESS)
+	if (runMode == RUN_MAIN_ENGINE && next_event_to_daq >= 0) {
+		o_redStatus->cur_state = on;
+		if (!event_to_daq(next_event_to_daq++)) {
+			next_event_to_daq = -1;
+			o_redStatus->cur_state = off;
+		}
+	} else if (joystick_edge_value == JOY_PRESS)
 		return tft_menu_machine(&main_menu);
 	return &l_error_state;
 }

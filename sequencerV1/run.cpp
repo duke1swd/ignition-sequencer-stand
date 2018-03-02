@@ -49,6 +49,7 @@
 #include "tft_menu.h"
 #include "io_ref.h"
 #include "run.h"
+#include "events.h"
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7735.h> // Hardware-specific library
 
@@ -151,12 +152,19 @@ void runMainExit()
 void runStartEnter()
 {
 	test_start_t = millis();
-	rep_n_samples = 0;
-	rep_max_pressure = 0;
-	rep_sum_pressure = 0;
+	if (runMode == RUN_IG_ONLY) {
+		rep_n_samples = 0;
+		rep_max_pressure = 0;
+		rep_sum_pressure = 0;
+		o_daq0->cur_state = on;	// goes on at commanded start
+	} else {
+		o_greenStatus->cur_state = pulse_on;
+		o_amberStatus->cur_state = on;
+		o_redStatus->cur_state = off;
+	}
+
 	at_pressure_t = 0;
 	runMainExit();
-	o_daq0->cur_state = on;	// goes on at commanded start
 }
 
 /*
@@ -180,9 +188,12 @@ void runIgExit()
 
 	// save daq state, but turn daq state off in case of error exit
 	l_daq0 = o_daq0->cur_state;
-	o_daq0->cur_state = off;
 	l_daq1 = o_daq1->cur_state;
-	o_daq1->cur_state = off;
+	if (runMode == RUN_IG_ONLY) {
+		o_daq0->cur_state = off;
+		o_daq1->cur_state = off;
+	} else
+		o_daq0->cur_state = on;
 }
 
 /*
@@ -194,7 +205,7 @@ const struct state * allAborts()
 
 	// operator abort by remote, button 2, or joystick
 	if (joystick_edge_value == JOY_PRESS ||
-			i_cmd_2->current_val ||
+			(runMode == RUN_IG_ONLY && i_cmd_2->current_val) ||
 			i_push_2->current_val)
 		return error_state(errorIgTestAborted);
 
@@ -209,12 +220,30 @@ const struct state * allAborts()
 	// p is the filtered pressure (counts * 4)
 	p = i_ig_pressure->filter_a;
 
-	if (!SENSOR_SANE(p))
-		return error_state(errorPressureInsane);
+	if (!SENSOR_SANE(p)) {
+		event(IgPressFail);
+		return error_state(errorIgPressureInsane);
+	}
 
 	// abort if pressure sensor broken
-	if (p < min_pressure)
+	if (p < min_pressure) {
+		event(IgPressFail);
 		return error_state(errorIgNoPressure);
+	}
+
+	// p is the filtered pressure (counts * 4)
+	p = i_main_press->filter_a;
+
+	if (!SENSOR_SANE(p)) {
+		event(MainPressFail);
+		return error_state(errorMainPressureInsane);
+	}
+
+	// abort if pressure sensor broken
+	if (p < min_pressure) {
+		event(MainPressFail);
+		return error_state(errorMainNoPressure);
+	}
 
 	return NULL;
 }

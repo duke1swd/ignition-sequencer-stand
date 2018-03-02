@@ -83,6 +83,7 @@ extern struct state igLocalDebugEntry;
 extern struct state igRemoteTestEntry;
 extern struct state igLongTestEntry;
 extern struct state flowTest;
+extern struct state sequenceEntry;
 
 /*
  * Main menu
@@ -134,7 +135,7 @@ const struct menu_item main_menu_items[] = {
   },
   {
      "Main Sequence",
-     NULL,
+     &sequenceEntry,
   },
 };
 
@@ -178,6 +179,7 @@ static void joystick_edge_trigger()
  */
 void setup() {
   void mainValveInit();
+  void event_init();
   void myPanic(const char *msg);
 
   Serial.begin(9600);
@@ -187,6 +189,7 @@ void setup() {
   Serial.println("Startup.");
   setup_inputs();
   setup_outputs();
+  event_init();
   digitalWrite(o_powerStatus->pin, HIGH);
   if (!validate_io())
     myPanic("Invalid I/O Setup");
