@@ -19,6 +19,7 @@ struct input inputs[n_inputs] = {
 	0,		// analog_hyst
 	0,		// prev_val
 	0,		// current_val
+	no_edge,	// edge
 	0,		// last_change_t
 	0,		// filter_a
 	0,		// use multi_input_ladder #0
@@ -32,6 +33,7 @@ struct input inputs[n_inputs] = {
 	0,		// analog_hyst
 	0,		// prev_val
 	0,		// current_val
+	no_edge,	// edge
 	0,		// last_change_t
 	0,		// filter_a
 	0,		// use multi_input_ladder #0
@@ -45,6 +47,7 @@ struct input inputs[n_inputs] = {
 	0,		// analog_hyst	unused
 	0,		// prev_val
 	0,		// current_val
+	no_edge,	// edge
 	0,		// last_change_t
 	0,		// filter_a	unused
 	0,		// multi_input_ladder	unused
@@ -58,6 +61,7 @@ struct input inputs[n_inputs] = {
 	0,		// analog_hyst	unused
 	0,		// prev_val
 	0,		// current_val
+	no_edge,	// edge
 	0,		// last_change_t
 	0,		// filter_a	unused
 	0,		// multi_input_ladder	unused
@@ -72,6 +76,7 @@ struct input inputs[n_inputs] = {
 	0,		// analog_hyst	unused
 	0,		// prev_val
 	0,		// current_val
+	no_edge,	// edge
 	0,		// last_change_t
 	0,		// filter_a	unused
 	0,		// multi_input_ladder	unused
@@ -86,6 +91,7 @@ struct input inputs[n_inputs] = {
 	0,		// analog_hyst	unused
 	0,		// prev_val
 	0,		// current_val
+	no_edge,	// edge
 	0,		// last_change_t
 	0,		// filter_a	unused
 	0,		// multi_input_ladder	unused
@@ -99,6 +105,7 @@ struct input inputs[n_inputs] = {
 	0,		// analog_hyst	unused
 	0,		// prev_val
 	0,		// current_val
+	no_edge,	// edge
 	0,		// last_change_t
 	0,		// filter_a	unused
 	0,		// multi_input_ladder	unused
@@ -112,6 +119,7 @@ struct input inputs[n_inputs] = {
 	0,		// analog_hyst	unused
 	0,		// prev_val
 	0,		// current_val
+	no_edge,	// edge
 	0,		// last_change_t
 	0,		// filter_a	unused
 	0,		// multi_input_ladder	unused
@@ -125,6 +133,7 @@ struct input inputs[n_inputs] = {
 	0,		// analog_hyst	unused
 	0,		// prev_val
 	0,		// current_val
+	no_edge,	// edge
 	0,		// last_change_t
 	0,		// filter_a	unused
 	0,		// multi_input_ladder	unused
@@ -138,6 +147,7 @@ struct input inputs[n_inputs] = {
 	0,		// analog_hyst
 	0,		// prev_val
 	0,		// current_val
+	no_edge,	// edge
 	0,		// last_change_t
 	0,		// filter_a
 	0,		// use multi_input_ladder #0

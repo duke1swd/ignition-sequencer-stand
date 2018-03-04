@@ -14,8 +14,6 @@
 #include <Adafruit_ST7735.h> // Hardware-specific library
 #include <avr/pgmspace.h>    // used to hold text strings in program space.
 
-extern unsigned char runMode;
-
 /*
  * These are the text error messages.
  * Error numbers are defined in errors.h
@@ -89,10 +87,7 @@ erEnter()
 	o_greenStatus->cur_state = off;
 
 	o_daq0->cur_state = off;
-	if (runMode == RUN_MAIN_ENGINE)
-		o_daq0->cur_state = on;
-	else
-		o_daq1->cur_state = off;
+	o_daq1->cur_state = off;
 
 	// background is RED
 	tft.fillScreen(ST7735_RED);
@@ -129,13 +124,7 @@ erExit()
  */
 const struct state * erCheck()
 {
-	if (runMode == RUN_MAIN_ENGINE && next_event_to_daq >= 0) {
-		o_redStatus->cur_state = on;
-		if (!event_to_daq(next_event_to_daq++)) {
-			next_event_to_daq = -1;
-			o_redStatus->cur_state = off;
-		}
-	} else if (joystick_edge_value == JOY_PRESS)
+	if (joystick_edge_value == JOY_PRESS)
 		return tft_menu_machine(&main_menu);
 	return &l_error_state;
 }

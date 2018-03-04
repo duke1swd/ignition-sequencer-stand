@@ -67,6 +67,12 @@ enum input_mode {
 	multi_input
 	};
 
+enum input_edge {
+	no_edge,
+	rising,
+	falling
+};
+
 #define N_INPUT_STATES 2
 
 #define N_OUTPUT_MODES 6
@@ -103,6 +109,7 @@ struct input {
   int analog_hyst;
   unsigned char prev_val;
   unsigned char current_val;	// this is the digital value of the input pin, debounced, etc.
+  enum input_edge edge;		// signal rising, falling or none.
   unsigned long last_change_t;
   unsigned int filter_a;	// this is the analog value of the input pin, filtered, if analog_th >= 0.
   unsigned char multi_input_ladder; // which multi_input_ladder should we use?

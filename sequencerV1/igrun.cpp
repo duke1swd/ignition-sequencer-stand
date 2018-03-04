@@ -166,7 +166,7 @@ void common_test_enter()
 	was_power = 0;
 	igTestDisplay();
 	igThisTest = current_state;
-	runInit(RUN_IG_ONLY);
+	runInit();
 }
 
 /*

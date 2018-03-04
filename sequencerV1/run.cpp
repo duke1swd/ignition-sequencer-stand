@@ -62,8 +62,6 @@ extern void mainN2OClose();
 extern void spark_run();
 extern Adafruit_ST7735 tft;
 
-unsigned char runMode;	// ignition only?  Or whole enchilada?
-
 /*
  * Report variables
  */
@@ -89,9 +87,8 @@ void shutdownEnter();
 const struct state *shutdownCheck();
 struct state shutdown { "shutdown", &shutdownEnter, NULL, shutdownCheck};
 
-void runInit(unsigned char mode)
+void runInit()
 {
-	runMode = mode;
 }
 
 static bool safe_ok()
@@ -103,9 +100,7 @@ static bool safe_ok()
 		return 0;
 
 	// Ignition tests require main to be safe.
-	// Main engine bur requires main to be not safe.
-	s = i_safe_main->current_val;
-	return (runMode == RUN_IG_ONLY)? (s == 1): (s == 0);
+	return (i_safe_main->current_val == 0);
 }
 
 static bool power_ok()
@@ -152,16 +147,10 @@ void runMainExit()
 void runStartEnter()
 {
 	test_start_t = millis();
-	if (runMode == RUN_IG_ONLY) {
-		rep_n_samples = 0;
-		rep_max_pressure = 0;
-		rep_sum_pressure = 0;
-		o_daq0->cur_state = on;	// goes on at commanded start
-	} else {
-		o_greenStatus->cur_state = pulse_on;
-		o_amberStatus->cur_state = on;
-		o_redStatus->cur_state = off;
-	}
+	rep_n_samples = 0;
+	rep_max_pressure = 0;
+	rep_sum_pressure = 0;
+	o_daq0->cur_state = on;	// goes on at commanded start
 
 	at_pressure_t = 0;
 	runMainExit();
@@ -189,11 +178,8 @@ void runIgExit()
 	// save daq state, but turn daq state off in case of error exit
 	l_daq0 = o_daq0->cur_state;
 	l_daq1 = o_daq1->cur_state;
-	if (runMode == RUN_IG_ONLY) {
-		o_daq0->cur_state = off;
-		o_daq1->cur_state = off;
-	} else
-		o_daq0->cur_state = on;
+	o_daq0->cur_state = off;
+	o_daq1->cur_state = off;
 }
 
 /*
@@ -205,7 +191,7 @@ const struct state * allAborts()
 
 	// operator abort by remote, button 2, or joystick
 	if (joystick_edge_value == JOY_PRESS ||
-			(runMode == RUN_IG_ONLY && i_cmd_2->current_val) ||
+			i_cmd_2->current_val ||
 			i_push_2->current_val)
 		return error_state(errorIgTestAborted);
 
@@ -380,18 +366,10 @@ const struct state * runIgRunCheck()
 
 	// Grace is over.
 
-	if (runMode == RUN_IG_ONLY) {
-		// Keep going until either too much time has passed or we flame out
-		if (p >= good_pressure && t <= ig_run_time)
-			return current_state;
-		return &igRunReport;
-	} else {
-		if (p < good_pressure)
-			return error_state(errorIgFlameOut);
-		// XXX QQQ XXX
-		// transition to running the main engine
-		return &igRunReport;	// replace this with the main engine state
-	}
+	// Keep going until either too much time has passed or we flame out
+	if (p >= good_pressure && t <= ig_run_time)
+		return current_state;
+	return &igRunReport;
 }
 
 /*

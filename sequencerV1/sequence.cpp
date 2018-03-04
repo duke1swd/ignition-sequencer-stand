@@ -64,8 +64,6 @@ static bool power_ok()
  */
 void sequenceEntryEnter()
 {
-	runInit(RUN_MAIN_ENGINE);
-
 	tft.fillScreen(TM_TXT_BKG_COLOR);
 	tft.setTextSize(TM_TXT_SIZE+1);
 	tft.setCursor(8, TM_TXT_OFFSET);
@@ -182,6 +180,7 @@ const struct state * sequenceEntryCheck()
 
 	if (i_cmd_2->current_val) {
 		event_enable();
+		i_cmd_2->edge = no_edge; // runStart will abort of rising edge of i_cmd_2
 		return &runStart;
 	}
 
