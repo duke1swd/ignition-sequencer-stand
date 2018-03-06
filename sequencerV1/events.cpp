@@ -86,4 +86,6 @@ int event_count() {
  * Returns true on success, false when you've run out of stuff to dump
  */
 bool event_to_daq(int i) {
+	// QQQ 
+	return false;
 }

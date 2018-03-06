@@ -8,7 +8,6 @@
 #include "joystick.h"
 #include "tft_menu.h"
 #include "io_ref.h"
-#include "run.h"
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7735.h> // Hardware-specific library
 
@@ -166,7 +165,6 @@ void common_test_enter()
 	was_power = 0;
 	igTestDisplay();
 	igThisTest = current_state;
-	runInit();
 }
 
 /*

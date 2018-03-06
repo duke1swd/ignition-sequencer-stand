@@ -13,11 +13,13 @@ enum event_codes {
 	MainPressFail,	// Igniter chamber pressure sensor failed
 	IgStart,	// t=0
 	IgSpark,	// turn on spark
+	IgN2O,		// open Ig N2O valve
 	IgIPA,		// open Ig IPA valve
 	MvSlack,	// set main valves to +1 degrees
+	OpAbort,	// operator aborted by pressing a button
 	IgPressOK,	// Ig chamber pressure goes from < 70 PSI to > 70 PSI
 	IgPressNAK,	// Ig chamber pressure goes from > 70 PSI to < 70 PSI
-	igFail0,	// Ig chamber pressure < 70 PSI after IgPressStable
+	IgFail0,	// Ig chamber pressure < 70 PSI after IgPressStable
 	IgPressStable,	// Ig pressure deamed stable
 	IgSparkOff,	// turn off spark
 	IgFail1,	// No IgPressStable by t=500

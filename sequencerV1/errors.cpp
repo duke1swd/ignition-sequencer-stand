@@ -8,7 +8,6 @@
 #include "joystick.h"
 #include "tft_menu.h"
 #include "io_ref.h"
-#include "run.h"
 #include "events.h"
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7735.h> // Hardware-specific library
@@ -33,6 +32,8 @@ const char e_msg_9[]  PROGMEM = "Mn Sesnor Fault";	// Main sensor missing or bro
 const char e_msg_10[] PROGMEM = "Seq Op Abort";		// Operator abort of main sequence
 const char e_msg_11[] PROGMEM = "Seq Abort Safe";	// Main sequence abort on safe switch
 const char e_msg_12[] PROGMEM = "Seq Abort Power";	// Main seqeucne abort on power switch
+const char e_msg_13[] PROGMEM = "Seq Oper Abort";	// Main sequence aborted by operator
+const char e_msg_14[] PROGMEM = "Seq No Main Pre";	// Main sequence aborted: main did not light
 
 const char * const error_messages[] PROGMEM = {
 	e_msg_0,
@@ -48,6 +49,8 @@ const char * const error_messages[] PROGMEM = {
 	e_msg_10,
 	e_msg_11,
 	e_msg_12,
+	e_msg_13,
+	e_msg_14,
 };
 
 char e_msg[16];
@@ -62,6 +65,8 @@ const struct state *erCheck();
 struct state l_error_state = { "error display", &erEnter, &erExit, &erCheck};
 
 static int next_event_to_daq;
+static const struct state *l_restart_state;
+static bool l_restartable;
 
 /*
  * Called by a check routine.  Saves the
@@ -72,6 +77,19 @@ const struct state *error_state(unsigned char code)
 {
 	error_code = code;
 	return &l_error_state;
+}
+
+/*
+ * If an error is restartable, give the state you restart to.
+ */
+void error_set_restart(const struct state *restart_state)
+{
+	l_restart_state = restart_state;
+}
+
+void error_set_restartable(bool restartable)
+{
+	l_restartable = restartable;
 }
 
 /*
@@ -88,6 +106,9 @@ erEnter()
 
 	o_daq0->cur_state = off;
 	o_daq1->cur_state = off;
+
+	// clear any edge event on remote command #1
+	i_cmd_1->edge = no_edge;
 
 	// background is RED
 	tft.fillScreen(ST7735_RED);
@@ -119,12 +140,22 @@ erExit()
 }
 
 /*
- * Dump the event log to daq
  * Wait for joystick press.
+ * For main sequence restartable errors, also look for remote control #1
  */
 const struct state * erCheck()
 {
-	if (joystick_edge_value == JOY_PRESS)
-		return tft_menu_machine(&main_menu);
+	if (joystick_edge_value == JOY_PRESS) {
+		if (l_restartable && l_restart_state)
+			return l_restart_state;
+		else
+			return tft_menu_machine(&main_menu);
+	}
+
+	if (i_cmd_1->edge == rising && l_restartable) {
+		i_cmd_1->edge = no_edge;
+		return l_restart_state;
+	}
+
 	return &l_error_state;
 }

@@ -48,17 +48,13 @@
 #include "joystick.h"
 #include "tft_menu.h"
 #include "io_ref.h"
-#include "run.h"
 #include "events.h"
+#include "mainvalves.h"
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7735.h> // Hardware-specific library
 
 #define	DAQ1PRESSURE	1    // put state of pressure sensor on daq1 line.
 
-extern void mainIPAOpen();
-extern void mainIPAClose();
-extern void mainN2OOpen();
-extern void mainN2OClose();
 extern void spark_run();
 extern Adafruit_ST7735 tft;
 
@@ -86,10 +82,6 @@ struct state igRunReport { "igRunRep", &igReportEnter, NULL, igRepCheck};
 void shutdownEnter();
 const struct state *shutdownCheck();
 struct state shutdown { "shutdown", &shutdownEnter, NULL, shutdownCheck};
-
-void runInit()
-{
-}
 
 static bool safe_ok()
 {
@@ -185,7 +177,7 @@ void runIgExit()
 /*
  * check for abort conditions
  */
-const struct state * allAborts()
+static const struct state * allAborts()
 {
 	unsigned int p;
 

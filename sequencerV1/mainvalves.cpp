@@ -43,6 +43,18 @@ void mainIPAOpen()
 	IPAServo.write(ipa_open);
 }
 
+void
+mainIPACrack()
+{
+	IPAServo.write(ipa_crack);
+}
+
+void
+mainIPAPartial()
+{
+	IPAServo.write(ipa_partial);
+}
+
 void mainIPAClose()
 {
 	if (valveTestMode) {
@@ -65,6 +77,18 @@ void mainN2OOpen()
 #endif
 	}
 	N2OServo.write(n2o_open);
+}
+
+void
+mainN2OCrack()
+{
+	N2OServo.write(n2o_crack);
+}
+
+void
+mainN2OPartial()
+{
+	N2OServo.write(n2o_partial);
 }
 
 void mainN2OClose()

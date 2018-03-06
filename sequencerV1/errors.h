@@ -17,7 +17,11 @@ const unsigned char errorMainPressureInsane =	error_base + 8;		// main pressure 
 const unsigned char errorMainNoPressure =	error_base + 9;		// main pressure sensor value out of range
 const unsigned char errorSeqLocalAbort =	error_base + 10;	// local push button at start of main sequence
 
-const unsigned char errorseqSafe =		error_base + 11;	// sequnce aborted by safe switch
-const unsigned char errorseqPower =		error_base + 12;	// sequnce aborted by power switch turning off
+const unsigned char errorSeqSafe =		error_base + 11;	// sequence aborted by safe switch
+const unsigned char errorSeqPower =		error_base + 12;	// sequence aborted by power switch turning off
+const unsigned char errorSeqOpAbort =		error_base + 13;	// sequence aborted by operator
+const unsigned char errorSeqNoMain =		error_base + 14;	// sequence aborted when main chamber doesn't light
 
 extern const struct state * error_state(unsigned char error_code);
+extern void error_set_restart(const struct state *restart_state);
+extern void error_set_restartable(bool restartable);
