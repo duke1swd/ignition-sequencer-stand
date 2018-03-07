@@ -17,8 +17,6 @@
  *		Runs the main burn.  Job is to sequence close valves on a schedule
  *	sequence_report
  *		This state dumps the event log to the DAQ.
- *
- * TODO: make green rectangle appear on first display of entry screen
  */
 
 #include "parameters.h"
@@ -149,6 +147,7 @@ allAborts()
  */
 void sequenceEntryEnter()
 {
+	mainValvesOff();			// turn off the servos
 	tft.fillScreen(TM_TXT_BKG_COLOR);
 	tft.setTextSize(TM_TXT_SIZE+1);
 	tft.setCursor(8, TM_TXT_OFFSET);
@@ -159,8 +158,8 @@ void sequenceEntryEnter()
 	tft.setTextColor(TM_TXT_FG_COLOR);
 	tft.print("RUN");
 	
-	was_safe = 0;
-	was_power = 0;
+	was_safe = true;	// force screen redraw
+	was_power = false;
 	i_cmd_2->edge = no_edge;
 
 	error_set_restart(&sequenceEntry);
@@ -173,8 +172,12 @@ void sequenceEntryEnter()
  * to a more pleasing combination.
  */
 void sequenceEntryExit() {
-	// XXX this call takes about 100 ms, which is a problem!
-	//tft.fillScreen(TM_TXT_BKG_COLOR);
+	/*
+	 * This call takes about 100 ms, which is a problem!
+	 * Solution is to ensure the next state starts up slowly.
+	 */
+	tft.fillScreen(TM_TXT_BKG_COLOR);
+
 	o_greenStatus->cur_state = off;
 	o_amberStatus->cur_state = off;
 	o_redStatus->cur_state = on;
@@ -291,10 +294,11 @@ const struct state * sequenceEntryCheck()
 unsigned long sequence_time;
 unsigned long sequence_phase_time;
 
-bool ig_ipa_on;
-bool ig_n2o_on;
-bool ig_spark_on;
-bool mv_cracked;
+static bool ig_ipa_on;
+static bool ig_n2o_on;
+static bool ig_spark_on;
+static bool mv_cracked;
+static bool light_enter;
 
 // called when the sequence is commanded to start
 void
@@ -303,9 +307,6 @@ sequenceIgLightEnter()
 	o_greenStatus->cur_state = pulse_on;	// set to blinking green
 	o_amberStatus->cur_state = on;
 	o_redStatus->cur_state = off;
-	event(IgStart);
-	sequence_time = loop_start_t;
-	sequence_phase_time = loop_start_t;
 	ig_ipa_on = false;
 	ig_n2o_on = false;
 	ig_spark_on = false;
@@ -313,6 +314,7 @@ sequenceIgLightEnter()
 	o_n2oIgValve->cur_state = off;
 	error_set_restartable(true);
 	mv_cracked = false;
+	light_enter = true;
 }
 
 void
@@ -331,6 +333,26 @@ const struct state *sequenceIgLightCheck()
 	es = allAborts();
 	if (es)
 		return es;
+
+	if (light_enter) {
+		/*
+		 * Deferred entry code
+		 * This code is moved out of the entry routine to ensure a reasonable loop_start_t
+		 * Otherwise, the screen erase runs for 100 ms and loop_start_t is 100 ms out of date.
+		 */
+		event(IgStart);
+		sequence_time = loop_start_t;
+		sequence_phase_time = loop_start_t;
+		light_enter = false;
+
+		/*
+		 * Valve are already closed.  These calls ensure the servos are attached 
+		 * and powered up.
+		 */
+		mainIPAClose();
+		mainN2OClose();
+		return current_state;
+	}
 
 	// how long have we been in this state?
 	t = loop_start_t - sequence_phase_time;
@@ -584,7 +606,7 @@ sequenceMVFullExit()
 	o_daq1->cur_state = off;
 }
 
-static const struct state *
+const struct state *
 sequenceMVFullCheck()
 {
 	unsigned long t;

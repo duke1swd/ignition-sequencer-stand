@@ -1,8 +1,5 @@
 /*
  * This code displays error messages.
- * TODO: Move the screen manipulation in the check routine.
- * Is Verboten to do it in the entry routine because that delays processing outputs, which
- * may be critical.
  */
 
 #include "parameters.h"
@@ -70,6 +67,7 @@ struct state l_error_state = { "error display", &erEnter, &erExit, &erCheck};
 static int next_event_to_daq;
 static const struct state *l_restart_state;
 static bool l_restartable;
+static bool do_entry_stuff;
 
 /*
  * Called by a check routine.  Saves the
@@ -112,6 +110,23 @@ erEnter()
 
 	// clear any edge event on remote command #1
 	i_cmd_1->edge = no_edge;
+	do_entry_stuff = true;
+}
+
+/*
+ * This code used to be in the state entry routine.
+ * However this code takes > 100 ms to run.  Since output
+ * processing happens *after* the entry routine, and
+ * since output transitions on an error may be time critical,
+ * we delay the entry manipulation of the screen
+ * into the check routine.
+ */
+static int i_do_entry_stuff()
+{
+	if (!do_entry_stuff)
+		return;
+
+	do_entry_stuff = false;
 
 	// background is RED
 	tft.fillScreen(ST7735_RED);
@@ -148,6 +163,8 @@ erExit()
  */
 const struct state * erCheck()
 {
+	i_do_entry_stuff();
+
 	if (joystick_edge_value == JOY_PRESS) {
 		if (l_restartable && l_restart_state)
 			return l_restart_state;

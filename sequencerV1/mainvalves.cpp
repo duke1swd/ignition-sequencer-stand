@@ -24,6 +24,7 @@ const struct state *mainValveTestCheck();
 struct state mainValveTest = { "mainValveTest", &mainValveTestEnter, &mainValveTestExit, &mainValveTestCheck};
 
 static bool valveTestMode;
+static bool attached;		// true if the servos are currently attached.
 
 /*
  * Functions to open and close the main valves.
@@ -31,8 +32,27 @@ static bool valveTestMode;
 Servo N2OServo;
 Servo IPAServo;
 
+static void i_do_attach()
+{
+	if (!attached) {
+		N2OServo.attach(N2OServoPin);
+		IPAServo.attach(IPAServoPin);
+		attached = true;
+	}
+}
+
+void mainValvesOff()
+{
+	if (attached) {
+		N2OServo.detach();
+		IPAServo.detach();
+		attached = false;
+	}
+}
+
 void mainIPAOpen()
 {
+	i_do_attach();
 	if (valveTestMode) {
 		o_daq1->cur_state = on;
 		o_testled->cur_state = single_on;
@@ -46,17 +66,20 @@ void mainIPAOpen()
 void
 mainIPACrack()
 {
+	i_do_attach();
 	IPAServo.write(ipa_crack);
 }
 
 void
 mainIPAPartial()
 {
+	i_do_attach();
 	IPAServo.write(ipa_partial);
 }
 
 void mainIPAClose()
 {
+	i_do_attach();
 	if (valveTestMode) {
 		o_daq1->cur_state = off;
 		o_testled->cur_state = single_on;
@@ -69,6 +92,7 @@ void mainIPAClose()
 
 void mainN2OOpen()
 {
+	i_do_attach();
 	if (valveTestMode) {
 		o_daq0->cur_state = on;
 		o_testled->cur_state = single_on;
@@ -82,17 +106,20 @@ void mainN2OOpen()
 void
 mainN2OCrack()
 {
+	i_do_attach();
 	N2OServo.write(n2o_crack);
 }
 
 void
 mainN2OPartial()
 {
+	i_do_attach();
 	N2OServo.write(n2o_partial);
 }
 
 void mainN2OClose()
 {
+	i_do_attach();
 	if (valveTestMode) {
 		o_daq0->cur_state = off;
 		o_testled->cur_state = single_on;
@@ -108,11 +135,10 @@ void mainN2OClose()
  */
 void mainValveInit()
 {
+	attached = false;
 	valveTestMode = false;
-	N2OServo.attach(N2OServoPin);
-	mainN2OClose();
 
-	IPAServo.attach(IPAServoPin);
+	mainN2OClose();
 	mainIPAClose();
 }
 
