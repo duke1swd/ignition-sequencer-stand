@@ -17,6 +17,8 @@
  *		Runs the main burn.  Job is to sequence close valves on a schedule
  *	sequence_report
  *		This state dumps the event log to the DAQ.
+ *
+ * TODO: make green rectangle appear on first display of entry screen
  */
 
 #include "parameters.h"
@@ -171,7 +173,8 @@ void sequenceEntryEnter()
  * to a more pleasing combination.
  */
 void sequenceEntryExit() {
-	tft.fillScreen(TM_TXT_BKG_COLOR);
+	// XXX this call takes about 100 ms, which is a problem!
+	//tft.fillScreen(TM_TXT_BKG_COLOR);
 	o_greenStatus->cur_state = off;
 	o_amberStatus->cur_state = off;
 	o_redStatus->cur_state = on;
@@ -306,8 +309,8 @@ sequenceIgLightEnter()
 	ig_ipa_on = false;
 	ig_n2o_on = false;
 	ig_spark_on = false;
-	o_ipaIgValve->cur_state = on;
-	o_n2oIgValve->cur_state = on;
+	o_ipaIgValve->cur_state = off;
+	o_n2oIgValve->cur_state = off;
 	error_set_restartable(true);
 	mv_cracked = false;
 }
@@ -561,6 +564,8 @@ sequenceMVFullEnter()
 	o_n2oIgValve->cur_state = on;
 	error_set_restartable(false);
 	event(MvFull);
+	mainN2OOpen();
+	mainIPAOpen();
 }
 
 void 

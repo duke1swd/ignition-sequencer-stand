@@ -1,5 +1,8 @@
 /*
  * This code displays error messages.
+ * TODO: Move the screen manipulation in the check routine.
+ * Is Verboten to do it in the entry routine because that delays processing outputs, which
+ * may be critical.
  */
 
 #include "parameters.h"

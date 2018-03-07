@@ -2,7 +2,7 @@
  * Error codes
  */
 
-#define	NUM_ERRORS 13
+#define	NUM_ERRORS 15
 
 const unsigned char error_base = 1;
 const unsigned char errorIgTestAborted =	error_base + 0;		// test aborted by operator

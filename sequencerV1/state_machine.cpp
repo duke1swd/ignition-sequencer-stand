@@ -422,7 +422,7 @@ void read_input(struct input* in) {
   } else {
     if (in->last_change_t + debounce_t < millis() &&
       in->current_val != in_val) {
-        in->edge = (in->current_val? rising: falling);
+        in->edge = (in_val? rising: falling);
         in->current_val = in_val;
     }
   }
