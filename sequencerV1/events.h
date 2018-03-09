@@ -47,4 +47,4 @@ void event(enum event_codes);
 enum event_codes event_code(int);
 unsigned long event_time(int);
 int event_count();
-bool event_to_daq(int i);
+int event_to_daq(int i);

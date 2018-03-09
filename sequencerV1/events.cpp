@@ -12,6 +12,7 @@
 #include "state_machine.h"
 #include "events.h"
 #include "io_ref.h"
+#include "sendtodaq.h"
 
 static struct event_s {
 	enum event_codes e_e;
@@ -76,10 +77,17 @@ int event_count() {
 }
 
 /*
- * Write the entire event log to the daq by toggling the daq lines.
- * Returns true on success, false when you've run out of stuff to dump
+ * Using DAQ lines write an event _i_ to the DAQ.
+ * Returns 0 for valid events.
+ * Returns 1 for _i_ out of range.
  */
-bool event_to_daq(int i) {
-	// QQQ 
-	return false;
+int event_to_daq(int i) {
+	if (i < 0 || i >= n_events || i >= EVENT_BUFFER_SIZE)
+		return 1;
+
+	send_som();
+	send_byte((unsigned char)event_buffer[i].e_e);
+	send_long(event_buffer[i].time_e);
+	send_eom();
+	return 0;
 }
