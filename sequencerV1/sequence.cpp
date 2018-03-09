@@ -597,7 +597,7 @@ sequenceMVFullEnter()
 	mainN2OOpen();
 	mainIPAOpen();
 	o_daq0->cur_state = off;
-	2_daq1->cur_state = off;	// Step 4, even step, DAQ1 *off*
+	o_daq1->cur_state = off;	// Step 4, even step, DAQ1 *off*
 }
 
 void 
