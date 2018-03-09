@@ -50,12 +50,6 @@ void event(enum event_codes e) {
 	if (!enabled)
 		return;
 
-	// Toggle the daq1 line on every event.
-	if (o_daq1->cur_state == off)
-		o_daq1->cur_state = on;
-	else
-		o_daq1->cur_state = off;
-
 	// Record the event if we have space
 	if (n_events < EVENT_BUFFER_SIZE) {
 		event_buffer[n_events].e_e = e;

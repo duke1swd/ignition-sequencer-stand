@@ -161,6 +161,8 @@ void sequenceEntryEnter()
 	was_safe = true;	// force screen redraw
 	was_power = false;
 	i_cmd_2->edge = no_edge;
+	o_daq0->cur_state = off;
+	o_daq1->cur_state = off;
 
 	error_set_restart(&sequenceEntry);
 	error_set_restartable(true);
@@ -315,6 +317,8 @@ sequenceIgLightEnter()
 	error_set_restartable(true);
 	mv_cracked = false;
 	light_enter = true;
+	o_daq0->cur_state = off;
+	o_daq1->cur_state = on;		// Step 1, odd step, DAQ1 *on*
 }
 
 void
@@ -415,6 +419,8 @@ sequenceIgPressureEnter()
 	o_ipaIgValve->cur_state = on;
 	o_n2oIgValve->cur_state = on;
 	error_set_restartable(true);
+	o_daq0->cur_state = off;
+	o_daq1->cur_state = off;	// Step 2, even step, DAQ1 *off*
 }
 
 void
@@ -502,6 +508,8 @@ sequenceMainValvesStartEnter()
 	mainPressWasGood = false;
 	o_ipaIgValve->cur_state = on;
 	o_n2oIgValve->cur_state = on;
+	o_daq0->cur_state = off;
+	o_daq1->cur_state = on;		// Step 3, odd step, DAQ1 *on*
 }
 
 void
@@ -588,6 +596,8 @@ sequenceMVFullEnter()
 	event(MvFull);
 	mainN2OOpen();
 	mainIPAOpen();
+	o_daq0->cur_state = off;
+	2_daq1->cur_state = off;	// Step 4, even step, DAQ1 *off*
 }
 
 void 
