@@ -30,6 +30,8 @@
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7735.h> // Hardware-specific library
 
+#define	SEQ_REP_PULSE_WIDTH	10	// width, in ms, of pulse output on both daq lines at end of run.
+
 extern void spark_run();
 extern Adafruit_ST7735 tft;
 extern struct menu main_menu;
@@ -312,6 +314,8 @@ sequenceIgLightEnter()
 	o_greenStatus->cur_state = pulse_on;	// set to blinking green
 	o_amberStatus->cur_state = on;
 	o_redStatus->cur_state = off;
+	o_daq0->cur_state = off;
+	o_daq1->cur_state = on;			// state #1, odd, daq1 is on.
 	ig_ipa_on = false;
 	ig_n2o_on = false;
 	ig_spark_on = false;
@@ -325,6 +329,7 @@ sequenceIgLightEnter()
 void
 sequenceIgLightExit()
 {
+	o_daq0->cur_state = on;			// Set daq0 on error exit.
 	o_ipaIgValve->cur_state = off;
 	o_n2oIgValve->cur_state = off;
 	error_set_restartable(false);
@@ -415,6 +420,8 @@ static enum pressstate_e {
 void
 sequenceIgPressureEnter()
 {
+	o_daq0->cur_state = off;
+	o_daq1->cur_state = off;		// state #2, even, daq1 is off.
 	sequence_phase_time = loop_start_t;
 	pressstate = pressNoPress;
 	o_ipaIgValve->cur_state = on;
@@ -425,6 +432,7 @@ sequenceIgPressureEnter()
 void
 sequenceIgPressureExit()
 {
+	o_daq0->cur_state = on;			// Set daq0 on error exit.
 	o_ipaIgValve->cur_state = off;
 	o_n2oIgValve->cur_state = off;
 	error_set_restartable(false);
@@ -500,6 +508,8 @@ static bool mainPressWasGood;
 void
 sequenceMainValvesStartEnter()
 {
+	o_daq0->cur_state = off;
+	o_daq1->cur_state = on;			// state #3, odd, daq1 is on.
 	sequence_phase_time = loop_start_t;
 	error_set_restartable(true);
 	closeMainOnExit = true;
@@ -514,6 +524,7 @@ sequenceMainValvesStartEnter()
 void
 sequenceMainValvesStartExit()
 {
+	o_daq0->cur_state = on;			// Set daq0 on error exit.
 	error_set_restartable(false);
 	o_ipaIgValve->cur_state = off;
 	o_n2oIgValve->cur_state = off;
@@ -590,6 +601,8 @@ static unsigned long full_time;
 void 
 sequenceMVFullEnter()
 {
+	o_daq0->cur_state = off;
+	o_daq1->cur_state = off;		// state #4, even, daq1 is off.
 	full_time = loop_start_t;
 	o_ipaIgValve->cur_state = on;
 	o_n2oIgValve->cur_state = on;
@@ -602,6 +615,8 @@ sequenceMVFullEnter()
 void 
 sequenceMVFullExit()
 {
+	o_daq0->cur_state = on;			// Set daq0 on error exit.
+	o_daq1->cur_state = off;
 	event(IgIPAClose);
 	event(SequenceDone);
 	o_ipaIgValve->cur_state = off;
@@ -611,8 +626,6 @@ sequenceMVFullExit()
 	o_greenStatus->cur_state = off;
 	o_amberStatus->cur_state = pulse_on;
 	o_redStatus->cur_state = off;
-	o_daq0->cur_state = off;
-	o_daq1->cur_state = off;
 }
 
 const struct state *
@@ -640,19 +653,25 @@ sequenceMVFullCheck()
 }
 
 /*
- * This state dumps the events to the DAQ
+ * This state begins with 10 ms pulse on both DAQ lines,
+ * then dumps 10 ms daq off, then dumps the event log
+ * to the DAQ
  */
 static int event_line;
+static int pulse_state;
+static unsigned long seq_rep_next_time;
 
 void 
 sequenceReportEnter()
 {
 	event_line = 0;
+	pulse_state = 0;
+	seq_rep_next_time = loop_start_t + SEQ_REP_PULSE_WIDTH;
 	o_greenStatus->cur_state = off;
 	o_amberStatus->cur_state = on;
 	o_redStatus->cur_state = off;
-	o_daq0->cur_state = off;
-	o_daq1->cur_state = off;
+	o_daq0->cur_state = on;
+	o_daq1->cur_state = on;
 }
 
 void 
@@ -668,6 +687,20 @@ sequenceReportExit()
 const struct state *
 sequenceReportCheck()
 {
+	if (pulse_state == 0) {
+		if (loop_start_t >= seq_rep_next_time) {
+			pulse_state = 1;
+			o_daq0->cur_state = off;
+			o_daq1->cur_state = off;
+			seq_rep_next_time = loop_start_t + SEQ_REP_PULSE_WIDTH;
+		}
+		return current_state;
+	} else if (pulse_state == 1)  {
+		if (loop_start_t >= seq_rep_next_time)
+			pulse_state = 2;
+		return current_state;
+	}
+
 	if (event_to_daq(event_line))
 		return tft_menu_machine(&main_menu);
 	delay(2);		// Superstition.
