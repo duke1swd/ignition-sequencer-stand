@@ -59,6 +59,11 @@ void sequenceMVFullExit();
 const struct state *sequenceMVFullCheck();
 struct state sequenceMVFull = { "sequenceMVFull", &sequenceMVFullEnter, &sequenceMVFullExit, &sequenceMVFullCheck};
 
+void sequenceReportEnter();
+void sequenceReportExit();
+const struct state *sequenceReportCheck();
+struct state sequenceReport = { "sequenceReport", &sequenceReportEnter, &sequenceReportExit, &sequenceReportCheck};
+
 static bool was_power;	// true if last iteration we displayed the power error message
 static bool was_safe;	// true if last iteration we displayed the safe error message
 
@@ -629,9 +634,43 @@ sequenceMVFullCheck()
 	}
 
 	if (t >= main_run_time)
-		//return &sequenceReport;
-		return tft_menu_machine(&main_menu); // QQQ XXX 
+		return &sequenceReport;
 
+	return current_state;
+}
+
+/*
+ * This state dumps the events to the DAQ
+ */
+static int event_line;
+
+void 
+sequenceReportEnter()
+{
+	event_line = 0;
+	o_greenStatus->cur_state = off;
+	o_amberStatus->cur_state = on;
+	o_redStatus->cur_state = off;
+	o_daq0->cur_state = off;
+	o_daq1->cur_state = off;
+}
+
+void 
+sequenceReportExit()
+{
+	o_greenStatus->cur_state = off;
+	o_amberStatus->cur_state = off;
+	o_redStatus->cur_state = off;
+	o_daq0->cur_state = off;
+	o_daq1->cur_state = off;
+}
+
+const struct state *
+sequenceReportCheck()
+{
+	if (event_to_daq(event_line))
+		return tft_menu_machine(&main_menu);
+	event_line += 1;
 
 	return current_state;
 }
