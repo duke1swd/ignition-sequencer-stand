@@ -466,6 +466,7 @@ sequenceIgPressureCheck()
 				pressstate = pressNoPress;
 			} else if (loop_start_t - pressstate_time >= ig_stable_spark) {
 				event(IgPressStable);
+				event(IgSparkOff);
 				pressstate_time = loop_start_t;
 				pressstate = pressWaitNoSpark;
 			}
@@ -478,6 +479,7 @@ sequenceIgPressureCheck()
 				return error_state(errorIgFlameOut);
 			} else if (loop_start_t - pressstate_time >= ig_stable_no_spark) {
 				time_M = loop_start_t;
+				event(IgStable);
 				return &sequenceMainValvesStart;
 			}
 			break;
@@ -564,11 +566,13 @@ sequenceMainValvesStartCheck()
 
 	// sequence opening the main valves
 	if (!mainIPAIsOpen && t >= main_IPA_open_time) {
+		event(MvIPAStart);
 		mainIPAPartial();
 		mainIPAIsOpen = true;
 	}
 
 	if (!mainN2OIsOpen && t >= main_N2O_open_time) {
+		event(MvN2OStart);
 		mainN2OPartial();
 		mainN2OIsOpen = true;
 	}
@@ -618,8 +622,9 @@ sequenceMVFullCheck()
 
 	t = loop_start_t - full_time;
 
-	if (t >= main_ig_n2o_close && o_n2oIgValve->cur_state == on) {
+	if (t >= main_ig_n2o_close && ig_n2o_on) {
 		o_n2oIgValve->cur_state = off;
+		ig_n2o_on = false;
 		event(IgN2OClose);
 	}
 
