@@ -101,8 +101,13 @@ erEnter()
 {
 	next_event_to_daq = 0;
 
-	o_redStatus->cur_state = on;
-	o_amberStatus->cur_state = off;
+	if (l_restartable) {
+		o_redStatus->cur_state = off;
+		o_amberStatus->cur_state = on;
+	} else {
+		o_redStatus->cur_state = on;
+		o_amberStatus->cur_state = off;
+	}
 	o_greenStatus->cur_state = off;
 
 	o_daq0->cur_state = off;

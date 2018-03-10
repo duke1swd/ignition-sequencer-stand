@@ -19,6 +19,17 @@
  *		This state dumps the event log to the DAQ.
  */
 
+/*
+ * NOTES on daq output line control
+ *
+ * There are 4 main phases the motor goes through, named above as
+ * sequenceIgLight through sequenceMVFull.  We number these states
+ * 1 through 4, and put the low order bit of that number on daq line 1.
+ * Daq line 0 is low throughout, unless we exit to an error state.
+ * On error daq line 1 is set high.   If the error is restartable
+ * then when we come back here daq 0 will be set low again.
+ */
+
 #include "parameters.h"
 #include "state_machine.h"
 #include "errors.h"
@@ -68,6 +79,7 @@ struct state sequenceReport = { "sequenceReport", &sequenceReportEnter, &sequenc
 
 static bool was_power;	// true if last iteration we displayed the power error message
 static bool was_safe;	// true if last iteration we displayed the safe error message
+static bool enter_screen_redraw;	// used to force screen redraw
 
 static bool safe_ok()
 {
@@ -165,7 +177,8 @@ void sequenceEntryEnter()
 	tft.setTextColor(TM_TXT_FG_COLOR);
 	tft.print("RUN");
 	
-	was_safe = true;	// force screen redraw
+	enter_screen_redraw = true;	// force screen redraw
+	was_safe = false;
 	was_power = false;
 	i_cmd_2->edge = no_edge;
 
@@ -192,7 +205,6 @@ void sequenceEntryExit() {
 	o_daq1->cur_state = off;
 	o_ipaIgValve->cur_state = off;
 	o_n2oIgValve->cur_state = off;
-	error_set_restartable(false);
 }
 
 
@@ -276,10 +288,11 @@ const struct state * sequenceEntryCheck()
 	o_redStatus->cur_state = off;
 
 	// erase the error and replace with a green rectangle
-	if (was_safe || was_power) {
+	if (was_safe || was_power || enter_screen_redraw) {
 		tft.fillRect(0,96,160,32, ST7735_GREEN);
 		was_safe = false;
 		was_power = false;
+		enter_screen_redraw = false;
 	}
 
 	// If the 'fire' button pressed, then it is time to go.
@@ -321,7 +334,6 @@ sequenceIgLightEnter()
 	ig_spark_on = false;
 	o_ipaIgValve->cur_state = off;
 	o_n2oIgValve->cur_state = off;
-	error_set_restartable(true);
 	mv_cracked = false;
 	light_enter = true;
 }
@@ -332,7 +344,6 @@ sequenceIgLightExit()
 	o_daq0->cur_state = on;			// Set daq0 on error exit.
 	o_ipaIgValve->cur_state = off;
 	o_n2oIgValve->cur_state = off;
-	error_set_restartable(false);
 }
 
 const struct state *sequenceIgLightCheck()
@@ -426,7 +437,6 @@ sequenceIgPressureEnter()
 	pressstate = pressNoPress;
 	o_ipaIgValve->cur_state = on;
 	o_n2oIgValve->cur_state = on;
-	error_set_restartable(true);
 }
 
 void
@@ -435,7 +445,6 @@ sequenceIgPressureExit()
 	o_daq0->cur_state = on;			// Set daq0 on error exit.
 	o_ipaIgValve->cur_state = off;
 	o_n2oIgValve->cur_state = off;
-	error_set_restartable(false);
 }
 
 const struct state *
@@ -511,7 +520,6 @@ sequenceMainValvesStartEnter()
 	o_daq0->cur_state = off;
 	o_daq1->cur_state = on;			// state #3, odd, daq1 is on.
 	sequence_phase_time = loop_start_t;
-	error_set_restartable(true);
 	closeMainOnExit = true;
 	mainIPAIsOpen = false;
 	mainN2OIsOpen = false;
@@ -525,7 +533,6 @@ void
 sequenceMainValvesStartExit()
 {
 	o_daq0->cur_state = on;			// Set daq0 on error exit.
-	error_set_restartable(false);
 	o_ipaIgValve->cur_state = off;
 	o_n2oIgValve->cur_state = off;
 	if (closeMainOnExit) {
@@ -585,12 +592,14 @@ sequenceMainValvesStartCheck()
 		event(MvIPAStart);
 		mainIPAPartial();
 		mainIPAIsOpen = true;
+		error_set_restartable(false);
 	}
 
 	if (!mainN2OIsOpen && t >= main_N2O_open_time) {
 		event(MvN2OStart);
 		mainN2OPartial();
 		mainN2OIsOpen = true;
+		error_set_restartable(false);
 	}
 	
 	return current_state;

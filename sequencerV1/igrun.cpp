@@ -165,6 +165,7 @@ void common_test_enter()
 	was_power = 0;
 	igTestDisplay();
 	igThisTest = current_state;
+	error_set_restartable(false);
 }
 
 /*
