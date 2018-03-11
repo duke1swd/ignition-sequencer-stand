@@ -66,6 +66,8 @@ const char * const build_str = "V0.2: 160801";
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
 //Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);	// use software SPI
 
+#include "eepromlocal.h"
+
 /*
  * State machinery is here.
  *
@@ -193,6 +195,8 @@ void setup() {
   digitalWrite(o_powerStatus->pin, HIGH);
   if (!validate_io())
     myPanic("Invalid I/O Setup");
+  if (eeprom_check_and_init())
+    myPanic("Invalid EEPROM Magic Number");
   mainValveInit();
 
   // status LEDs

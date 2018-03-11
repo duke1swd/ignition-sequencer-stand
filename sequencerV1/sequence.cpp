@@ -710,10 +710,12 @@ sequenceReportCheck()
 		return current_state;
 	}
 
+	/* XXX QQQ
 	if (event_to_daq(event_line))
 		return tft_menu_machine(&main_menu);
 	delay(2);		// Superstition.
 	event_line += 1;
+	*/
 
 	return current_state;
 }

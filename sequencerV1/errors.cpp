@@ -126,7 +126,7 @@ erEnter()
  * we delay the entry manipulation of the screen
  * into the check routine.
  */
-static int i_do_entry_stuff()
+static void i_do_entry_stuff()
 {
 	if (!do_entry_stuff)
 		return;

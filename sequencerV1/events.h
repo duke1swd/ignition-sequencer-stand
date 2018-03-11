@@ -1,6 +1,6 @@
 /*
  * During the main sequence we record a bunch of events.
- * These are later dumped to the DAQ for retrieval.
+ * After the sequence these are stored in EEPROM for later retrieval.
  *
  * Here are the known events:
  */
@@ -43,8 +43,6 @@ enum event_codes {
 void event_init();
 void event_enable();
 void event_disable();
+unsigned int event_commit();
 void event(enum event_codes);
-enum event_codes event_code(int);
-unsigned long event_time(int);
-int event_count();
-int event_to_daq(int i);
+bool event_to_serial(int i);
