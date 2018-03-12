@@ -664,16 +664,14 @@ sequenceMVFullCheck()
 /*
  * This state begins with 10 ms pulse on both DAQ lines,
  * then dumps 10 ms daq off, then dumps the event log
- * to the DAQ
+ * to EEPROM.  Finally we send the log sequence number to the DAQ.
  */
-static int event_line;
 static int pulse_state;
 static unsigned long seq_rep_next_time;
 
 void 
 sequenceReportEnter()
 {
-	event_line = 0;
 	pulse_state = 0;
 	seq_rep_next_time = loop_start_t + SEQ_REP_PULSE_WIDTH;
 	o_greenStatus->cur_state = off;
@@ -686,13 +684,16 @@ sequenceReportEnter()
 void 
 sequenceReportExit()
 {
-	o_greenStatus->cur_state = off;
+	o_greenStatus->cur_state = on;
 	o_amberStatus->cur_state = off;
 	o_redStatus->cur_state = off;
 	o_daq0->cur_state = off;
 	o_daq1->cur_state = off;
 }
 
+/*
+ * Pulse DAQ lines, then dump log to EEPROM and exit
+ */
 const struct state *
 sequenceReportCheck()
 {
@@ -710,12 +711,7 @@ sequenceReportCheck()
 		return current_state;
 	}
 
-	/* XXX QQQ
-	if (event_to_daq(event_line))
-		return tft_menu_machine(&main_menu);
-	delay(2);		// Superstition.
-	event_line += 1;
-	*/
+	event_commit_conditional();
 
-	return current_state;
+	return tft_menu_machine(&main_menu);
 }

@@ -8,11 +8,14 @@
 
 #include "Arduino.h"
 #include "EEPROM.h"
+#include "avr/pgmspace.h"
 #include "parameters.h"
 #include "state_machine.h"
 #include "events.h"
 #include "io_ref.h"
+#include "sendtodaq.h"
 #include "eepromlocal.h"
+#include "event_names.h"
 
 static struct event_s {
 	enum event_codes e_e;
@@ -101,6 +104,29 @@ unsigned int event_commit() {
 
 	return seqn;
 }
+
+/*
+ * Called by error states to commit.
+ * Does the required checks.
+ * Also, sends the seqn to the DAQ.
+ */
+void event_commit_conditional() {
+	unsigned int seqn;
+
+	if (!enabled || n_events == 0)
+		return;
+
+	enabled = false;
+	seqn = event_commit();
+	n_events = 0;
+
+	send_som();
+	send_byte((unsigned char)MY_EEPROM_MAGIC_NUMBER);
+	send_long((unsigned long)seqn);
+	send_eom();
+}
+
+
 /*
  * Write the log to Serial.
  * In order to allow this to be interrupted, we write 1 line at a time.
@@ -110,6 +136,8 @@ unsigned int event_commit() {
  * If it returns true on i=0, then no log exists.
  */
 static int n_eeprom_events;
+static char buffer[EVENT_MAX_CODE_LENGTH];
+
 bool event_to_serial(int i) {
 	int n;
 	unsigned int seqn;
@@ -149,10 +177,11 @@ bool event_to_serial(int i) {
 	if (l_t < 10)
 		Serial.print(" ");
 	Serial.print(l_t);
-	Serial.print(":");
+	Serial.print(": ");
 
-	// QQQ print the event op code
-	Serial.print("\n");
+	// Necessary casts and dereferencing, just copy.
+	strcpy_P(buffer, (char*)pgm_read_word(&(event_code_names[l_event.e_e])));
+	Serial.println(buffer);
 
 	return false;
 }

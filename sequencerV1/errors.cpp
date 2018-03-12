@@ -64,7 +64,6 @@ void erExit();
 const struct state *erCheck();
 struct state l_error_state = { "error display", &erEnter, &erExit, &erCheck};
 
-static int next_event_to_daq;
 static const struct state *l_restart_state;
 static bool l_restartable;
 static bool do_entry_stuff;
@@ -99,8 +98,6 @@ void error_set_restartable(bool restartable)
 void
 erEnter()
 {
-	next_event_to_daq = 0;
-
 	if (l_restartable) {
 		o_redStatus->cur_state = off;
 		o_amberStatus->cur_state = on;
@@ -150,6 +147,12 @@ static void i_do_entry_stuff()
 		tft.setCursor(0, 2 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
 		tft.print(e_msg);
 	}
+
+	/*
+	 * Write the event log to eeprom.
+	 * WARNING: this can take a while.
+	 */
+	event_commit_conditional();
 }
 
 void

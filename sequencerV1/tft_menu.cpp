@@ -14,7 +14,7 @@
 /*
  * Menu state
  */
-static unsigned char menu_state;
+static unsigned char menu_state = 0;
 static const struct menu * current_menu;
 
 /*
@@ -89,7 +89,11 @@ struct state * tft_menu_machine(const struct menu *my_menu)
 {
 	extern Adafruit_ST7735 tft;
 
-	menu_state = 0;
+	/*
+	 * Commenting out this line should result in the menu system
+	 * returning to previous state.  Needs testing.
+	 */
+	//menu_state = 0;
 	current_menu = my_menu;
 	tft.fillScreen(TM_TXT_BKG_COLOR); // erase before returning to menu system
 	screen_paint();

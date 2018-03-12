@@ -10,7 +10,7 @@
 enum event_codes {
 	no_event,	// Nothing to nobody
 	IgPressFail,	// Igniter chamber pressure sensor failed
-	MainPressFail,	// Igniter chamber pressure sensor failed
+	MainPressFail,	// Main chamber pressure sensor failed
 	IgStart,	// t=0
 	IgSpark,	// turn on spark
 	IgN2O,		// open Ig N2O valve
@@ -46,3 +46,4 @@ void event_disable();
 unsigned int event_commit();
 void event(enum event_codes);
 bool event_to_serial(int i);
+void event_commit_conditional();
