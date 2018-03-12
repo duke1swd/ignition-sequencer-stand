@@ -86,11 +86,20 @@ extern struct state igRemoteTestEntry;
 extern struct state igLongTestEntry;
 extern struct state flowTest;
 extern struct state sequenceEntry;
+extern struct state eventsToSerial;
 
 /*
  * Main menu
  */
 const struct menu_item main_menu_items[] = {
+  {
+     "Main Sequence",
+     &sequenceEntry,
+  },
+  {
+     "Dump Events",
+     &eventsToSerial,
+  },
   {
      "Igniter Debug",
      &igLocalDebugEntry,
@@ -134,10 +143,6 @@ const struct menu_item main_menu_items[] = {
   {
      "Remote Igniter",
      &igRemoteTestEntry,
-  },
-  {
-     "Main Sequence",
-     &sequenceEntry,
   },
 };
 
