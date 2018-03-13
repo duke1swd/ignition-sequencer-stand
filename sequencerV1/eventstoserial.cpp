@@ -2,6 +2,7 @@
  * This code dumps the events to the serial console
  */
 
+#include <Arduino.h>
 #include "state_machine.h"
 #include "joystick.h"
 #include "tft_menu.h"
@@ -57,17 +58,16 @@ static void eventDumpDisplay()
 	if (was_safe) {
 		tft.fillRect(0, 96, 160, 32, TM_TXT_BKG_COLOR);
 		was_safe = 0;
-	}
-
-	if (running == was_running)
+	} else if (running == was_running)
 		return;
+
 	was_running = running;
 
 	y = 3 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET;
 	tft.fillRect(20, y, 160, y+ 2*TM_TXT_HEIGHT, TM_TXT_BKG_COLOR);
 	tft.setTextSize(TM_TXT_SIZE);
 	tft.setCursor(20, y);
-	tft.print(running? "running": "done");
+	tft.print(running? "running": "done   ");
 }
 
 /*
@@ -86,12 +86,14 @@ void eventDumpEnter()
 	tft.setTextColor(TM_TXT_HIGH_COLOR);
 	tft.print("Dump to Serial");
 
+	running = true;
+
 	// force the display routine to refresh
-	running = false;
 	was_running = true;
 
 	event_line = 0;
 	i_push_1->edge = no_edge;
+	was_safe = 0;
 }
 
 /*
@@ -105,6 +107,8 @@ const struct state * eventDumpCheck()
 	if (joystick_edge_value == JOY_PRESS)
 		return tft_menu_machine(&main_menu);
 
+	eventDumpDisplay();
+
 	if (!safe_ok())
 		return current_state;
 
@@ -113,12 +117,11 @@ const struct state * eventDumpCheck()
 		running = !running;
 	}
 
-	eventDumpDisplay();
-
 	if (running) {
-		if (event_to_serial(event_line))
+		if (event_to_serial(event_line)) {
 			running = false;
-		else
+			Serial.println("Done printing log");
+		} else
 			event_line += 1;
 	}
 

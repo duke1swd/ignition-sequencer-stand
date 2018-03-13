@@ -88,6 +88,7 @@ unsigned int event_commit() {
 	// record the size of the event log
 	n = min(n_events, EVENT_BUFFER_SIZE);
 	EEPROM.put(EEPROM_EVENT_SIZE, n);
+	Serial.print("Writing "); Serial.print(n); Serial.print(" events to EEPROM\n");
 	
 	// write the events
 	for (i = 0; i < n; i++)
@@ -99,8 +100,7 @@ unsigned int event_commit() {
 	seqn += 1;
 	EEPROM.put(EEPROM_EVENT_SEQN, seqn);
 
-	i = 0;
-	EEPROM.put(EEPROM_EVENT_SIZE, i);
+	EEPROM.put(EEPROM_EVENT_SIZE_2, n);
 
 	return seqn;
 }
@@ -157,7 +157,9 @@ bool event_to_serial(int i) {
 		EEPROM.get(EEPROM_EVENT_SEQN, seqn);
 		Serial.print("Log #: ");
 		Serial.print(seqn);
-		Serial.print("\n");
+		Serial.print("  has ");
+		Serial.print(n_eeprom_events);
+		Serial.print(" events\n");
 		return false;
 	}
 	i -= 1;

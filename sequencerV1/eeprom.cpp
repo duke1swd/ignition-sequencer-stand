@@ -18,7 +18,10 @@ eeprom_check_and_init()
 
 	EEPROM.get(EEPROM_MAGIC, i);
 
-	if (i == 0) {
+	if (i == 65535UL) {
+		Serial.print("NO MAGIC FOUND.  Initializing to ");
+		i = MY_EEPROM_MAGIC_NUMBER;
+		Serial.println(i);
 		EEPROM.put(EEPROM_MAGIC, i);
 		return false;
 	} else if (i == MY_EEPROM_MAGIC_NUMBER)

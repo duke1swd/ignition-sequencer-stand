@@ -1,2 +1,5 @@
 Main sequence should abort if igniter pressure falls below main chamber pressure
 by more than 5 PSI for more than 20 ms.
+
+ISSUES
+ restarting after a restartable error triggered DAQ
