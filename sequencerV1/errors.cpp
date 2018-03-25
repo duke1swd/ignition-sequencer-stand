@@ -34,6 +34,7 @@ const char e_msg_11[] PROGMEM = "Seq Abort Safe";	// Main sequence abort on safe
 const char e_msg_12[] PROGMEM = "Seq Abort Power";	// Main seqeucne abort on power switch
 const char e_msg_13[] PROGMEM = "Seq Oper Abort";	// Main sequence aborted by operator
 const char e_msg_14[] PROGMEM = "Seq No Main Pre";	// Main sequence aborted: main did not light
+const char e_msg_15[] PROGMEM = "Ig Press < Main";	// Igniter pressure too low when main is up to pressure
 
 const char * const error_messages[] PROGMEM = {
 	e_msg_0,
@@ -51,6 +52,7 @@ const char * const error_messages[] PROGMEM = {
 	e_msg_12,
 	e_msg_13,
 	e_msg_14,
+	e_msg_15,
 };
 
 char e_msg[16];

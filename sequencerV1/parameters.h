@@ -36,6 +36,8 @@ static const int max_ig_pressure = 1196;		// 120 psi gage
 static const int main_good_pressure = 737;
 #define	SENSOR_SANE(x) (((int16_t)(x)) > 90 && ((uint16_t)(x)) < ((uint16_t)4000))
 
+static const int pressure_delta_allowed = 35;	// ig pressure can be this much less than main (about 5 PSI).
+
 /*
  * Timings
  */

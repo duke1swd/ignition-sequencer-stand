@@ -2,7 +2,7 @@
  * Error codes
  */
 
-#define	NUM_ERRORS 15
+#define	NUM_ERRORS 16
 
 const unsigned char error_base = 1;
 const unsigned char errorIgTestAborted =	error_base + 0;		// test aborted by operator
@@ -21,6 +21,7 @@ const unsigned char errorSeqSafe =		error_base + 11;	// sequence aborted by safe
 const unsigned char errorSeqPower =		error_base + 12;	// sequence aborted by power switch turning off
 const unsigned char errorSeqOpAbort =		error_base + 13;	// sequence aborted by operator
 const unsigned char errorSeqNoMain =		error_base + 14;	// sequence aborted when main chamber doesn't light
+const unsigned char errorIgTooLow =		error_base + 15;	// sequence aborted when ig pressure lower than main
 
 extern const struct state * error_state(unsigned char error_code);
 extern void error_set_restart(const struct state *restart_state);

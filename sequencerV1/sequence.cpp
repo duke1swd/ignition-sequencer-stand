@@ -647,6 +647,10 @@ sequenceMVFullCheck()
 	if (es)
 		return es;
 
+	// Check that ig pressure is not below chamber pressure.
+	if (i_ig_pressure->filter_a < i_main_press->filter_a - pressure_delta_allowed)
+		return error_state(errorIgTooLow);
+
 	t = loop_start_t - full_time;
 
 	if (t >= main_ig_n2o_close && ig_n2o_on) {
