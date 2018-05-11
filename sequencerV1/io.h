@@ -129,7 +129,7 @@ struct input inputs[n_inputs] = {
 	5,		// analog P5
 	active_high_in,	// normal input mode
 	active_high_in,	// current input mode
-	840,		// analog_th	approximately 4 volts
+	840,		// analog_th	trip on main power < 11.9 volts
 	0,		// analog_hyst	unused
 	0,		// prev_val
 	0,		// current_val
