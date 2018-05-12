@@ -1,5 +1,7 @@
 /*
  * Where do things live in the EEPROM?
+ *
+ * Note: there are 4KB of EEPROM available on this board
  */
 
 bool eeprom_check_and_init();

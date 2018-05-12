@@ -88,6 +88,7 @@ extern struct state flowTest;
 extern struct state sequenceEntry;
 extern struct state eventsToSerial;
 extern struct state traceToSerial;
+extern struct state traceTest;
 
 /*
  * Main menu
@@ -104,6 +105,10 @@ const struct menu_item main_menu_items[] = {
   {
      "Dump Trace",
      &traceToSerial,
+  },
+  {
+     "Trace Test",
+     &traceTest,
   },
   {
      "Igniter Debug",
@@ -192,6 +197,7 @@ static void joystick_edge_trigger()
 void setup() {
   void mainValveInit();
   void event_init();
+  void trace_init();
   void myPanic(const char *msg);
 
   Serial.begin(9600);
@@ -202,6 +208,7 @@ void setup() {
   setup_inputs();
   setup_outputs();
   event_init();
+  trace_init();
   digitalWrite(o_powerStatus->pin, HIGH);
   if (!validate_io())
     myPanic("Invalid I/O Setup");
