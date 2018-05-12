@@ -9,6 +9,7 @@
 #include "tft_menu.h"
 #include "io_ref.h"
 #include "events.h"
+#include "trace.h"
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7735.h> // Hardware-specific library
 #include <avr/pgmspace.h>    // used to hold text strings in program space.
@@ -78,6 +79,9 @@ static bool do_entry_stuff;
 const struct state *error_state(unsigned char code)
 {
 	error_code = code;
+#ifdef TRACE_PIN
+	trace_trigger();
+#endif
 	return &l_error_state;
 }
 
@@ -124,11 +128,19 @@ erEnter()
  * since output transitions on an error may be time critical,
  * we delay the entry manipulation of the screen
  * into the check routine.
+ *
+ * For this same reason, we delay entry_stuff until any tracing post
+ * trigger is complete.
  */
 static void i_do_entry_stuff()
 {
 	if (!do_entry_stuff)
 		return;
+#ifdef TRACE_PIN
+	if (!trace_done())
+		return;
+	trace_commit();
+#endif // TRACE_PIN
 
 	do_entry_stuff = false;
 

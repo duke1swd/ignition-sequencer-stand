@@ -17,6 +17,7 @@ bool eeprom_check_and_init();
 #define	EEPROM_TRACE_SIZE_2	11	// 1 byte
 #define	EEPROM_TRACE_TRIGGER	12	// 2 bytes
 #define	EEPROM_TRACE_INSERT	14	// 2 bytes
+#define	EEPROM_TRACE_PIN	16	// 1 byte
 
 #define	EEPROM_EVENT_LOG	128	// 500 * 4 bytes
 

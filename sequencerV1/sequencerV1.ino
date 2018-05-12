@@ -87,6 +87,7 @@ extern struct state igLongTestEntry;
 extern struct state flowTest;
 extern struct state sequenceEntry;
 extern struct state eventsToSerial;
+extern struct state traceToSerial;
 
 /*
  * Main menu
@@ -99,6 +100,10 @@ const struct menu_item main_menu_items[] = {
   {
      "Dump Events",
      &eventsToSerial,
+  },
+  {
+     "Dump Trace",
+     &traceToSerial,
   },
   {
      "Igniter Debug",

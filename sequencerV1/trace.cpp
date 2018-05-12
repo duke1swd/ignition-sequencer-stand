@@ -13,8 +13,8 @@
 #include "trace.h"
 #include "eepromlocal.h"
 
-#define	TRACE_SIZE	255	// must fit in an unsigned char
-#define	TRACE_POST	100
+#define	TRACE_SIZE	100	// must fit in an unsigned char
+#define	TRACE_POST	50
 
 static int trace_buffer[TRACE_SIZE];
 
@@ -41,6 +41,11 @@ void trace_trigger()
 {
 	triggered = true;
 	trigger = insert;
+}
+
+bool trace_done()
+{
+	return !enabled;
 }
 
 void trace_point(int data)
@@ -103,6 +108,12 @@ unsigned int trace_commit() {
 
 	EEPROM.put(EEPROM_TRACE_SIZE_2, n_points);
 	EEPROM.put(EEPROM_TRACE_TRIGGER, trigger);
+#ifdef TRACE_PIN
+	i = TRACE_PIN;
+#else // TRACE_PIN
+	i = 255;
+#endif // TRACE_PIN
+	EEPROM.put(EEPROM_TRACE_PIN, i);
 	EEPROM.put(EEPROM_TRACE_INSERT, insert);
 
 	trace_init();	// erase the in-memory version.  Avoids double calls
@@ -127,8 +138,8 @@ bool trace_to_serial(int i) {
 
 	// If i=0, print the header and check valid
 	if (i == 0) {
-		EEPROM.get(EEPROM_EVENT_SIZE, n_points);
-		EEPROM.get(EEPROM_EVENT_SIZE_2, n);
+		EEPROM.get(EEPROM_TRACE_SIZE, n_points);
+		EEPROM.get(EEPROM_TRACE_SIZE_2, n);
 		if (n != n_points) {
 			n_points = 0;
 			return true;
@@ -136,11 +147,14 @@ bool trace_to_serial(int i) {
 
 		EEPROM.get(EEPROM_TRACE_INSERT, insert);
 		EEPROM.get(EEPROM_TRACE_TRIGGER, trigger);
+		EEPROM.get(EEPROM_TRACE_SEQN, seqn);
+		EEPROM.get(EEPROM_TRACE_PIN, n);
 		
-		EEPROM.get(EEPROM_EVENT_SEQN, seqn);
 		Serial.print("Data Trace #: ");
 		Serial.print(seqn);
-		Serial.print("  has ");
+		Serial.print(" of pin ");
+		Serial.print(n);
+		Serial.print(" has ");
 		Serial.print(n_points);
 		Serial.print(" data points\n");
 		return false;
