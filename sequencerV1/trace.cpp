@@ -135,6 +135,7 @@ bool trace_to_serial(int i) {
 	unsigned int seqn;
 	int data;
 
+	enabled = false;
 
 	// If i=0, print the header and check valid
 	if (i == 0) {
@@ -161,12 +162,17 @@ bool trace_to_serial(int i) {
 	}
 	i -= 1;
 
-	// else print a trace data point
-	if (i < 0 || i >= n_points || i >= TRACE_SIZE)
+	// If done, reinitialize trace buffer and tell out loop we are done.
+	if (i < 0 || i >= n_points || i >= TRACE_SIZE) {
+		trace_init();
 		return true;
+	}
+
+	// else print a trace data point
 
 	// Deal with wrap-around ring-buffer stuff
-	i += insert;
+	//i += (int)insert;
+	i = i + insert;
 	if (i >= n_points)
 		i -= n_points;
 

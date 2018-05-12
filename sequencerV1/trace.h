@@ -1,7 +1,13 @@
 /*
  * Define what pin we are tracing.  If nothing, then not tracing.
  */
-#define	TRACE_PIN	5
+
+/*
+ * Some interesting pins:
+ * 	1 = main pressure
+ * 	2 = ig pressure
+ */
+#define	TRACE_PIN	1
 
 /*
  * Tracing support routines.
