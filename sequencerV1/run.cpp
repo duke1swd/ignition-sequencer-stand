@@ -85,12 +85,9 @@ struct state shutdown { "shutdown", &shutdownEnter, NULL, shutdownCheck};
 
 static bool safe_ok()
 {
-	// Igniter must not be safe
-	if (i_safe_ig->current_val == 1)
-		return 0;
-
+	// Igniter must not be safe, and
 	// Ignition tests require main to be safe.
-	return (i_safe_main->current_val == 0);
+	return i_safe_ig->current_val == 0 && i_safe_main->current_val == 1;
 }
 
 static bool power_ok()
