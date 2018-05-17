@@ -12,7 +12,7 @@ const int n_inputs = 10;
 struct input inputs[n_inputs] = {
     {
 	"joystick",	// name
-	3,		// pin
+	A3,		// pin
 	multi_input,	// normal input mode
 	multi_input,	// current input mode
 	0,		// analog_th.  Must be 0 if type is multi_input
@@ -26,7 +26,7 @@ struct input inputs[n_inputs] = {
     },
     {
 	"ig_pressure",	// name
-	2,		// pin
+	A2,		// pin
 	multi_input,	// normal input mode
 	multi_input,	// current input mode
 	0,		// analog_th.  Must be >=0 for analog pin
@@ -126,7 +126,7 @@ struct input inputs[n_inputs] = {
     },
     {
     	"power_sense",	// name
-	5,		// analog P5
+	A5,		// analog P5
 	active_high_in,	// normal input mode
 	active_high_in,	// current input mode
 	840,		// analog_th	trip on main power < 11.9 volts
@@ -140,7 +140,7 @@ struct input inputs[n_inputs] = {
     },
     {
 	"main_press",	// name
-	1,		// pin
+	A1,		// pin
 	multi_input,	// normal input mode
 	multi_input,	// current input mode
 	0,		// analog_th.  Must be >=0 for analog pin

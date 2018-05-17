@@ -4,10 +4,11 @@
 
 /*
  * Some interesting pins:
- * 	1 = main pressure
- * 	2 = ig pressure
+ * 	A1 = main pressure
+ * 	A2 = ig pressure
+ * 	A5 = power supply
  */
-#define	TRACE_PIN	1
+#define	TRACE_PIN	A5
 
 /*
  * Tracing support routines.
