@@ -154,6 +154,7 @@ allAborts()
 
 	// abort if pressure sensor broken
 	if (p < min_pressure) {
+/*xxx*/Serial.print("MAIN ABORT:  p=");Serial.print(p);Serial.print("  min_pressure=");Serial.println(min_pressure);
 		event(MainPressFail);
 		return error_state(errorMainNoPressure);
 	}
@@ -242,8 +243,12 @@ const struct state * sequenceEntryCheck()
 	if (!SENSOR_SANE(p))
 		return error_state(errorMainPressureInsane);
 
-	if (p < min_pressure || p > max_idle_pressure)
+	if (p < min_pressure || p > max_idle_pressure) {
+/*xxx*/Serial.print("MAIN ABORT 2:  p=");Serial.print(p);Serial.print("  min_pressure=");Serial.print(min_pressure);Serial.print("  max_idle_pressure=");Serial.println(max_idle_pressure);
+/*xxx*/Serial.print("  i_main_press->filter_a = ");Serial.println(i_main_press->filter_a);
+/*xxx*/Serial.print("  pin = ");Serial.println(i_main_press->pin);
 		return error_state(errorMainNoPressure);
+	}
 
 	if (joystick_edge_value == JOY_PRESS)
 		return tft_menu_machine(&main_menu);

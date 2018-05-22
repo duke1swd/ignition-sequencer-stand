@@ -371,14 +371,14 @@ void read_input(struct input* in) {
     } else {
       int v = analogRead(in->pin);
       unsigned long f = in->filter_a;
-#ifdef TRACE_PIN
-      if (in->pin == TRACE_PIN)
-	 trace_point(v);
-#endif // TRACE_PIN
       f *= (ANALOG_FILTER_TIME - 1UL);
       f += v * ANALOG_FILTER_SCALE + ANALOG_FILTER_SCALE/2;
       f /= ANALOG_FILTER_TIME;
       in->filter_a = f;
+#ifdef TRACE_PIN
+      if (in->pin == TRACE_PIN)
+	 trace_point((int)f);
+#endif // TRACE_PIN
       f /= ANALOG_FILTER_SCALE;
       if (m == active_low_in) {
         if (in->prev_val) {
