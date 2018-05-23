@@ -177,6 +177,7 @@ erExit()
 	o_amberStatus->cur_state = on;
 	o_greenStatus->cur_state = off;
 	o_daq1->cur_state = off;
+	trace_init();
 }
 
 /*

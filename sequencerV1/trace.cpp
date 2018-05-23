@@ -116,7 +116,7 @@ unsigned int trace_commit() {
 	EEPROM.put(EEPROM_TRACE_PIN, i);
 	EEPROM.put(EEPROM_TRACE_INSERT, insert);
 
-	trace_init();	// erase the in-memory version.  Avoids double calls
+	tirggered = false;	// avoid double calls here.
 
 	return seqn;
 }
