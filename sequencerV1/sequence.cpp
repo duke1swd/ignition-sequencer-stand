@@ -223,6 +223,9 @@ const struct state * sequenceEntryCheck()
 	unsigned int p;
 	extern const struct state * current_state;
 
+	if (joystick_edge_value == JOY_PRESS)
+		return tft_menu_machine(&main_menu);
+
 	// copy the command input button to the daq.
 	// This allows remote daq start.
 	o_daq0->cur_state = (i_cmd_1->current_val == 1? on: off);
