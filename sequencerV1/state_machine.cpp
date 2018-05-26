@@ -88,8 +88,6 @@ void handle_cmd() {
     Serial.println("'");
   }
 
-  boolean parse_valid = true;
-
   cmd_str = strtok(input_buf, separator);
   id_str = strtok(NULL, separator);
   val_str = strtok(NULL, separator);  
