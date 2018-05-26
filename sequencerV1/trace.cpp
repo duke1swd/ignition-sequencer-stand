@@ -142,6 +142,7 @@ bool trace_to_serial(int i) {
 		EEPROM.get(EEPROM_TRACE_SIZE, n_points);
 		EEPROM.get(EEPROM_TRACE_SIZE_2, n);
 		if (n != n_points) {
+			Serial.println("No valid trace in EEPROM");
 			n_points = 0;
 			return true;
 		}

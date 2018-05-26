@@ -25,6 +25,7 @@ const char* help_str =
 "  read <input name>: query the current mode and value of an input\n"
 "  reada <input name>: read the analog value of an input\n"
 "  read <output name>: query the current mode and value of an output\n"
+"  tracedump: dump the current signal trace\n"
 "  state: query the current state of the state machine\n"
 "  list_io: list the available inputs and outputs\n"
 "  list_modes: list available input / output modes\n";
@@ -204,6 +205,9 @@ void handle_cmd() {
         out->cur_state = (output_state)v;
       }      
     }
+  } else if (strcmp(cmd_str, "tracedump") == 0) {
+    for (int i = 0; !trace_to_serial(i); i++) ;
+    Serial.println("Done printing trace");
   } else if (strcmp(cmd_str, "state") == 0) {
     Serial.print("Current state: ");
     Serial.println(current_state->name);

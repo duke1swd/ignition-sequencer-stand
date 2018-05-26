@@ -102,10 +102,12 @@ const struct menu_item main_menu_items[] = {
      "Dump Events",
      &eventsToSerial,
   },
+#ifdef notdef	// trace now accessed from debug command
   {
      "Dump Trace",
      &traceToSerial,
   },
+#endif
   {
      "Trace Test",
      &traceTest,
