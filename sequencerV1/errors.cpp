@@ -71,6 +71,13 @@ static const struct state *l_restart_state;
 static bool l_restartable;
 static bool do_entry_stuff;
 
+#define	NO_BLINK	0xff
+#define	BLINK_HALF_PERIOD	500	// half a second on, half a second off.
+#define	INTERBLINK	(BLINK_HALF_PERIOD * 4)
+static unsigned char e_blink_state;
+static unsigned long next_blink_time;
+
+
 /*
  * Called by a check routine.  Saves the
  * error number and returns the error state
@@ -119,6 +126,10 @@ erEnter()
 	// clear any edge event on remote command #1
 	i_cmd_1->edge = no_edge;
 	do_entry_stuff = true;
+
+	// Initialize blink state machine
+	e_blink_state = NO_BLINK;
+	next_blink_time = loop_start_t + INTERBLINK;
 }
 
 /*
@@ -186,6 +197,7 @@ erExit()
  */
 const struct state * erCheck()
 {
+	unsigned char t, v;
 	i_do_entry_stuff();
 
 	if (joystick_edge_value == JOY_PRESS) {
@@ -199,6 +211,30 @@ const struct state * erCheck()
 		i_cmd_1->edge = no_edge;
 		return l_restart_state;
 	}
+
+	// blink the code on the LEDs.
+	// Code is blinked in octal.  RED led blinks the number of 8s, AMBER the number of 1s
+	if (loop_start_t >= next_blink_time) {
+		o_redStatus->cur_state = off;
+		o_amberStatus->cur_state = off;
+
+		next_blink_time += BLINK_HALF_PERIOD;
+		e_blink_state += 1;
+
+		if ((e_blink_state & 1) == 0) {
+			t = (error_code & 0x38) / 4;	// divide by 8, multiply by 2
+			v = (error_code & 0x7) * 2;	// modulo 8, multiply by 2
+			if (e_blink_state < t) {
+				o_redStatus->cur_state = on;	// blink out the number of 8s in RED
+			} else if (e_blink_state - t < v) {
+				o_amberStatus->cur_state = on;	// blink out the 1s digit in AMBER
+			} else {
+				e_blink_state = NO_BLINK;
+				next_blink_time += INTERBLINK - BLINK_HALF_PERIOD;
+			}
+		}
+	}
+
 
 	return &l_error_state;
 }
