@@ -139,7 +139,7 @@ allAborts()
 	}
 
 	// abort if pressure sensor broken
-	if (p < min_pressure) {
+	if (p < min_pressure || p > max_pressure) {
 		event(IgPressFail);
 		return error_state(errorIgNoPressure);
 	}
@@ -153,7 +153,7 @@ allAborts()
 	}
 
 	// abort if pressure sensor broken
-	if (p < min_pressure) {
+	if (p < min_pressure || p > max_pressure) {
 /*xxx*/Serial.print("MAIN ABORT:  p=");Serial.print(p);Serial.print("  min_pressure=");Serial.println(min_pressure);
 		event(MainPressFail);
 		return error_state(errorMainNoPressure);
