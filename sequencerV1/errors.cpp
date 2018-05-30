@@ -68,7 +68,13 @@ const struct state *erCheck();
 struct state l_error_state = { "error display", &erEnter, &erExit, &erCheck};
 
 static const struct state *l_restart_state;
-static bool l_restartable;
+/* 
+ * 0 = not restartable
+ * 1 = restartable
+ * 2 = no longer restartable on the same error
+ */
+static unsigned char l_restartable;
+static unsigned char last_restartable_error;
 static bool do_entry_stuff;
 
 #define	NO_BLINK	0xff
@@ -86,6 +92,16 @@ static unsigned long next_blink_time;
 const struct state *error_state(unsigned char code)
 {
 	error_code = code;
+
+	/*
+	 * Don't restart on the second occurance of the same error,
+	 * but a new error code is still restartable.
+	 */
+	if (error_code != last_restartable_error) {
+		last_restartable_error = error_code;
+		if (l_restartable > 1)
+			l_restartable = 1;
+	}
 #ifdef TRACE_PIN
 	trace_trigger();
 #endif
@@ -102,7 +118,12 @@ void error_set_restart(const struct state *restart_state)
 
 void error_set_restartable(bool restartable)
 {
-	l_restartable = restartable;
+	if (restartable)
+		l_restartable++;
+	else
+		l_restartable = 0;
+	if (l_restartable > 2)
+		l_restartable = 2;
 }
 
 /*
@@ -111,7 +132,7 @@ void error_set_restartable(bool restartable)
 void
 erEnter()
 {
-	if (l_restartable) {
+	if (l_restartable == 1) {
 		o_redStatus->cur_state = off;
 		o_amberStatus->cur_state = on;
 	} else {
@@ -201,13 +222,13 @@ const struct state * erCheck()
 	i_do_entry_stuff();
 
 	if (joystick_edge_value == JOY_PRESS) {
-		if (l_restartable && l_restart_state)
+		if (l_restartable == 1 && l_restart_state)
 			return l_restart_state;
 		else
 			return tft_menu_machine(&main_menu);
 	}
 
-	if (i_cmd_1->edge == rising && l_restartable) {
+	if (i_cmd_1->edge == rising && l_restartable == 1 && l_restart_state) {
 		i_cmd_1->edge = no_edge;
 		return l_restart_state;
 	}
