@@ -194,8 +194,8 @@ void sequenceEntryEnter()
  */
 void sequenceEntryExit() {
 	/*
-	 * This call takes about 100 ms, which is a problem!
-	 * Solution is to ensure the next state starts up slowly.
+	 * This call takes about 100 ms, which is annoying
+	 * Net effect is that ignition is delayed by this amount.
 	 */
 	tft.fillScreen(TM_TXT_BKG_COLOR);
 
@@ -252,9 +252,6 @@ const struct state * sequenceEntryCheck()
 /*xxx*/Serial.print("  pin = ");Serial.println(i_main_press->pin);
 		return error_state(errorMainNoPressure);
 	}
-
-	if (joystick_edge_value == JOY_PRESS)
-		return tft_menu_machine(&main_menu);
 
 	/*
 	 * Display the status
