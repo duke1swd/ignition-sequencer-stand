@@ -193,12 +193,6 @@ void sequenceEntryEnter()
  * to a more pleasing combination.
  */
 void sequenceEntryExit() {
-	/*
-	 * This call takes about 100 ms, which is annoying
-	 * Net effect is that ignition is delayed by this amount.
-	 */
-	tft.fillScreen(TM_TXT_BKG_COLOR);
-
 	o_greenStatus->cur_state = off;
 	o_amberStatus->cur_state = off;
 	o_redStatus->cur_state = on;
@@ -329,6 +323,12 @@ static bool light_enter;
 void
 sequenceIgLightEnter()
 {
+	/*
+	 * This call takes about 100 ms, which is annoying
+	 * Net effect is that ignition is delayed by this amount.
+	 */
+	tft.fillScreen(TM_TXT_BKG_COLOR);
+
 	o_greenStatus->cur_state = pulse_on;	// set to blinking green
 	o_amberStatus->cur_state = on;
 	o_redStatus->cur_state = off;
