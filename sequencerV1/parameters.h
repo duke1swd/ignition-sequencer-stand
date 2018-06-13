@@ -67,4 +67,4 @@ static const int main_N2O_open_time = 50;	// open main N2O 40-60 ms after ignite
 static const int main_stable_time = 20;	// main chamber pressure to be up and stable for 20 milliseconds.
 static const int main_pressure_time = 400; // main pressure to be stable at M+400
 static const int main_ig_n2o_close = 50; // turn off igniter n2o after main up.
-static const int main_run_time = 5000;	// 5 second running time.
+static const int main_run_time = 8000;	// 8 second running time.
