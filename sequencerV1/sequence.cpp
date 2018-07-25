@@ -165,6 +165,19 @@ allAborts()
 /*
  * On Sequence Entry, set up the display and the LEDs
  */
+void tft_print_seconds(int t)
+{
+	int v;
+
+	v = t / 1000;
+	t = t - v * 1000;
+	tft.print((char)('0' + (char)v));
+	tft.print('.');
+
+	v = (t + 50) / 100;
+	tft.print((char)('0' + (char)v));
+}
+
 void sequenceEntryEnter()
 {
 	mainValvesOff();			// turn off the servos
@@ -177,6 +190,9 @@ void sequenceEntryEnter()
 	tft.setCursor(20, TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
 	tft.setTextColor(TM_TXT_FG_COLOR);
 	tft.print("RUN");
+	tft.setTextColor(TM_TXT_HIGH_COLOR);
+	tft.print(" = ");
+	tft_print_seconds(main_run_time);
 	
 	enter_screen_redraw = true;	// force screen redraw
 	was_safe = false;

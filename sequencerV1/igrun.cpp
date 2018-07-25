@@ -1,5 +1,12 @@
 /*
  *  This code handles entry into the ignition system test
+ *  There are four entry points from the menu system.
+ *  They are:
+ *  	igniter local test -- test controlled by local buttons
+ *  	igniter remote test -- test controlled by breakout box
+ *  	igniter debug -- test controlled by local buttons and using fixed timing
+ *  	igniter long test -- test controlled by ?? and runs 10 tests in a row.
+ *
  */
 
 #include "parameters.h"
@@ -25,6 +32,7 @@ const struct state *igLongTestRunCheck();
 struct state igLocalTestEntry = { "igLocalTest", &igLRTestEnter, NULL, &igLocalTestEntryCheck};
 struct state igLocalDebugEntry = { "igLocalDebug", &igLRDebugEnter, NULL, &igLocalTestEntryCheck};
 struct state igRemoteTestEntry = { "igRemoteTest", &igLRTestEnter, NULL, &igRemoteTestEntryCheck};
+struct state igRemoteDebugEntry = { "igRemoteDebug", &igLRDebugEnter, NULL, &igRemoteTestEntryCheck};
 struct state igLongTestEntry = { "igLongTestEnter", &igLongTestEnter, NULL, &igLongTestEntryCheck};
 struct state igLongTestRun = { "igLongTestRun", &igLongTestRunEnter, NULL, &igLongTestRunCheck};
 extern struct state runStart;
@@ -135,7 +143,7 @@ void igLRDebugEnter()
 void igLRTestEnter()
 {
 	testname = "IGNITION";
-	igDebug = true;
+	igDebug = false;
 	common_test_enter();
 }
 
@@ -146,7 +154,6 @@ void common_test_enter()
 {
 	extern const struct state * current_state;
 
-	igDebug = true;
 	tft.fillScreen(TM_TXT_BKG_COLOR);
 	tft.setTextSize(TM_TXT_SIZE+1);
 	tft.setCursor(8, TM_TXT_OFFSET);

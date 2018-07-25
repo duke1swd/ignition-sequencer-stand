@@ -83,6 +83,7 @@ extern struct state mainValveTest;
 extern struct state igLocalTestEntry;
 extern struct state igLocalDebugEntry;
 extern struct state igRemoteTestEntry;
+extern struct state igRemoteDebugEntry;
 extern struct state igLongTestEntry;
 extern struct state flowTest;
 extern struct state sequenceEntry;
@@ -113,8 +114,12 @@ const struct menu_item main_menu_items[] = {
      &traceTest,
   },
   {
-     "Igniter Debug",
+     "Ig Local Debug",
      &igLocalDebugEntry,
+  },
+  {
+     "Ig Remote Debug",
+     &igRemoteDebugEntry,
   },
   {
      "Ig Long Test",

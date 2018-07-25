@@ -262,8 +262,8 @@ const struct state * mainValveTestCheck()
 		return tft_menu_machine(&main_menu);
 
 	if (safe_ok()) {
-		ls1 = i_push_1->current_val;
-		ls2 = i_push_2->current_val;
+		ls1 = (i_push_1->current_val || i_cmd_1->current_val);
+		ls2 = (i_push_2->current_val || i_cmd_2->current_val);
 		if (ls1 && !ols1)
 			mainIPAOpen();
 		if (ls2 && !ols2)

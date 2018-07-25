@@ -378,16 +378,17 @@ void igReportEnter()
 	tft.print("REPORT");
 	tft.setTextSize(TM_TXT_SIZE);
 	tft.setCursor(20, 1 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
-	tft.print(loop_start_t - test_start_t);
+	tft.print("tt: "); tft.print(loop_start_t - test_start_t);
 	tft.setCursor(20, 2 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
+	tft.print("rt: ");
 	if (at_pressure_t)
 		tft.print(loop_start_t - at_pressure_t);
 	else
 		tft.print("none");
 	tft.setCursor(20, 3 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
-	tft.print(rep_max_pressure);
+	tft.print("mx: "); tft.print(rep_max_pressure);
 	tft.setCursor(20, 4 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
-	tft.print(rep_sum_pressure/rep_n_samples);
+	tft.print("av: "); tft.print(rep_sum_pressure/rep_n_samples);
 }
 
 /*
