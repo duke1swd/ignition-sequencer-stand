@@ -14,12 +14,12 @@ static const unsigned long spark_period = 25;	// milliseconds.  40 Hz
 
 static const int ipa_close = 44;
 static const int ipa_crack = ipa_close + SERVO_CRACK;
-static const int ipa_partial = ipa_close + 33;
+static const int ipa_partial = ipa_close + 33+10;
 static const int ipa_open = ipa_close + SERVO_OPEN;
 
 static const int n2o_close = 47 + 15;
 static const int n2o_crack = n2o_close + SERVO_CRACK;
-static const int n2o_partial = n2o_close + 37;
+static const int n2o_partial = n2o_close + 37+10;
 static const int n2o_open = n2o_close + SERVO_OPEN;
 
 
@@ -34,7 +34,7 @@ static const int max_idle_pressure = 450;	// 0 psi gage, plus big margin for err
 static const int good_pressure = 737;		// 50 psi gage
 //static const int max_ig_pressure = 901;		// 75 psi gage
 static const int max_ig_pressure = 1196;		// 120 psi gage
-static const int main_good_pressure = 737;
+static const int main_good_pressure = 676;	// 20 PSI gauge
 #define	SENSOR_SANE(x) (((int16_t)(x)) > 90 && ((uint16_t)(x)) < ((uint16_t)4000))
 
 static const int pressure_delta_allowed = 35;	// ig pressure can be this much less than main (about 5 PSI).
@@ -65,6 +65,6 @@ static const int ig_stable_no_spark = 20; // need 20 ms stble running with no sp
 static const int main_IPA_open_time = 0;	// open main IPA 0 ms after igniter OK
 static const int main_N2O_open_time = 50;	// open main N2O 40-60 ms after igniter OK
 static const int main_stable_time = 20;	// main chamber pressure to be up and stable for 20 milliseconds.
-static const int main_pressure_time = 400; // main pressure to be stable at M+400
+static const int main_pressure_time = 550; // main pressure to be stable at M+550
 static const int main_ig_n2o_close = 50; // turn off igniter n2o after main up.
 static const int main_run_time = 8000;	// 8 second running time.

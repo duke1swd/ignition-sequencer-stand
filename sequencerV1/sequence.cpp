@@ -5,6 +5,8 @@
  * 	sequenceEntry
  * 		This state sets things up and waits for the "fire" button. 
  * 		When the button is pressed exits to state sequence.
+ * 		When in this state, the "GO" button is echod to DAQ and runs
+ * 		the spark.
  *	sequenceIgLight
  *		This state is time based. Turns on igniter propellants and spark
  *	sequenceIgPressure
@@ -96,6 +98,7 @@ static bool safe_ok()
 
 static bool power_ok()
 {
+	/*xxx*/return true;
 	return i_power_sense->current_val == 1;
 }
 
@@ -239,6 +242,10 @@ const struct state * sequenceEntryCheck()
 	// copy the command input button to the daq.
 	// This allows remote daq start.
 	o_daq0->cur_state = (i_cmd_1->current_val == 1? on: off);
+
+	// run spark while "GO" button is held
+	if (i_cmd_1->current_val == 1)
+		spark_run();
 
 	// until proven otherwise, LEDs indicate not-ready
 	o_greenStatus->cur_state = off;
