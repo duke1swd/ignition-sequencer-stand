@@ -90,6 +90,7 @@ extern struct state sequenceEntry;
 extern struct state eventsToSerial;
 extern struct state traceToSerial;
 extern struct state traceTest;
+extern struct state powerTest;
 
 /*
  * Main menu
@@ -160,6 +161,10 @@ const struct menu_item main_menu_items[] = {
   {
      "Remote Igniter",
      &igRemoteTestEntry,
+  },
+  {
+     "Power Voltage",
+     &powerTest,
   },
 };
 
