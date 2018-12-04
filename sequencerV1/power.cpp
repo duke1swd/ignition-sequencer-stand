@@ -16,8 +16,8 @@ extern Adafruit_ST7735 tft;
 extern struct menu main_menu;
 
 #define	LOWER_DISP	100	// where to put display of inputs.
-#define	ROW1_DISP	57	// where to put display of current voltage
-#define	ROW2_DISP	78	// where to display min voltage
+#define	ROW1_DISP	53	// where to put display of current voltage
+#define	ROW2_DISP	76	// where to display min voltage
 #define	DISP_LABEL_X	4
 #define	DISP_TXT	2	// text height for power displays
 #define	DISP_VAL_X	(DISP_LABEL_X + DISP_TXT*6*4 + 2)
@@ -65,6 +65,7 @@ static void display_volts(int v, int y)
 static void powerDisplay()
 {
 	uint16_t c;
+	bool t;
 
 	tft.setTextColor(TM_TXT_FG_COLOR);
 	tft.setTextSize(3);
@@ -91,14 +92,19 @@ static void powerDisplay()
 	/*
 	 * Display the power values
 	 */
-	if (next_display_t < state_enter_t) {
-		next_display_t = state_enter_t + DISP_INTERVAL;
+	if (next_display_t < loop_start_t) {
+		next_display_t = loop_start_t + DISP_INTERVAL;
+		t = false;
 		if (oldCurPower != curPower) {
 			oldCurPower = curPower;
-			display_volts(curPower, ROW1_DISP);
+			t = true;
 		}
 		if (oldMinPower != minPower) {
 			oldMinPower = minPower;
+			t = true;
+		}
+		if (t) {
+			display_volts(curPower, ROW1_DISP);
 			display_volts(minPower, ROW2_DISP);
 		}
 	}
@@ -139,11 +145,10 @@ void powerTestEnter()
 	tft.fillScreen(TM_TXT_BKG_COLOR);
 	tft.setTextSize(TM_TXT_SIZE+1);
 	tft.setCursor(32, TM_TXT_OFFSET);
-	tft.setTextColor(TM_TXT_FG_COLOR);
+	tft.setTextColor(TM_TXT_HIGH_COLOR);
 	tft.print("POWER");
 	tft.setTextSize(TM_TXT_SIZE);
-	tft.setCursor(50, TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
-	tft.setTextColor(TM_TXT_HIGH_COLOR);
+	tft.setCursor(32, TM_TXT_HEIGHT+12+TM_TXT_OFFSET);
 	tft.print("Monitor");
 	tft.setTextSize(DISP_TXT);
 	tft.setCursor(DISP_LABEL_X, ROW1_DISP);
@@ -196,8 +201,6 @@ const struct state * powerTestCheck()
 		els1 = ls1;
 
 	ls2 = i_push_2->current_val;
-
-	powerDisplay();
 	
 	// get current and minimum power supply voltage
 	curPower = i_power_sense->filter_a;
@@ -218,6 +221,9 @@ const struct state * powerTestCheck()
 			o_n2oIgValve->cur_state = off;
 		}
 	}
+
+	// Display the current and min voltage
+	powerDisplay();
 
 	return &powerTest;
 }

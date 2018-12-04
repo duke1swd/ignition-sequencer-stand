@@ -72,4 +72,4 @@ static const int main_run_time = 8000;	// 8 second running time.
 /*
  * Misc
  */
-static const float power_volts_per_count = 1./282.35;
+static const float power_volts_per_count = 1./280.06;
