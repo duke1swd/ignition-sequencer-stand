@@ -191,7 +191,7 @@ static const struct state * allAborts()
 		return error_state(errorIgTestPower);
 
 	// p is the filtered pressure (counts * 4)
-	p = i_ig_pressure->filter_a;
+	p = i_ig_pressure->filter_a - zero_offset;
 
 	if (!SENSOR_SANE(p)) {
 		event(IgPressFail);
@@ -293,7 +293,7 @@ const struct state * runIgPressCheck()
 	spark_run();
 
 	// p is the filtered pressure (counts * 4)
-	p = i_ig_pressure->filter_a;
+	p = i_ig_pressure->filter_a - zero_offset;
 
 	// If good pressure, e.g. ignition, record the pressure sample
 	// and exit to the runIgRun state.
@@ -335,7 +335,7 @@ const struct state * runIgRunCheck()
 		return es;
 
 	// p is the filtered pressure (counts * 4)
-	p = i_ig_pressure->filter_a;
+	p = i_ig_pressure->filter_a - zero_offset;
 	record_p(p);
 
 	// t is how long since pressure came up
@@ -431,7 +431,7 @@ const struct state * runIgDebugCheck()
 		o_ipaIgValve->cur_state = on;
 
 	// p is the filtered pressure (counts * 4)
-	p = i_ig_pressure->filter_a;
+	p = i_ig_pressure->filter_a - zero_offset;
 
 #ifdef DAQ1PRESSURE
 	// daq 1 records if good pressure or not.

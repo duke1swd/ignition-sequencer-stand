@@ -28,6 +28,7 @@ static const int n2o_open = n2o_close + SERVO_OPEN;
  */
 // these pressure numbers assume a 500 PSI pressure sensor operating at 0.5 to 4.5 volts and a 12 bit DAQ
 static const int min_pressure = 360;	// 0 psi gage, less margin for error
+static const int zero_offset = 70;	// cold day!
 static const int max_pressure = 3031;	// about 400 PSI
 static const int max_idle_pressure = 450;	// 0 psi gage, plus big margin for error
 //static const int good_pressure = 508;		// 15 psi gage
