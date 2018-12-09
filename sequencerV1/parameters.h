@@ -50,9 +50,9 @@ static const int ig_spark_time = 0;	// when do we start spark?
 static const int mv_crack_time = 0;	// when to take up the slack in the main vales.
 static const int ig_spark_off_time = 600; // in debug, when to stop spark
 static const int ig_pressure_time = 500;// how long after spark before we need ignition
-static const int ig_spark_cont_time = 100;// how long after ignition (pressure) do we keep spark going
+static const int ig_spark_cont_time = 80;// how long after ignition (pressure) do we keep spark going
 // note: ig_pressure_grace should be >= ig_spark_cont_time
-static const int ig_pressure_grace = 250;// how long after ignition we start looking for no ignition
+static const int ig_pressure_grace = 120;// how long after ignition we start looking for no ignition
 
 static const int shutdown_timeout = 500;// wait this long after shutting down
 
@@ -61,8 +61,8 @@ static const int flow_test_time = 3000;	// fixed length flow run
 /*
  * Timings used only in main sequence
  */
-static const int ig_stable_spark = 20;	// need 20 ms stable running with spark
-static const int ig_stable_no_spark = 20; // need 20 ms stble running with no spark
+static const int ig_stable_spark = 80;	// need 80 ms stable running with spark  
+static const int ig_stable_no_spark = 40; // need 40 ms stble running with no spark
 static const int main_IPA_open_time = 0;	// open main IPA 0 ms after igniter OK
 static const int main_N2O_open_time = 50;	// open main N2O 40-60 ms after igniter OK
 static const int main_stable_time = 20;	// main chamber pressure to be up and stable for 20 milliseconds.

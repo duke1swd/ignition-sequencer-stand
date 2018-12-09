@@ -132,7 +132,7 @@ static void igTestDisplay()
  */
 void igLRDebugEnter()
 {
-	testname = "IGNITION";
+	testname = "IG DEBUG";
 	igDebug = true;
 	common_test_enter();
 }
@@ -208,7 +208,7 @@ const struct state * igLocalTestEntryCheck()
 		return &runStart;
 	}
 
-	return &igLocalTestEntry;
+	return current_state;
 }
 
 const struct state * igRemoteTestEntryCheck()

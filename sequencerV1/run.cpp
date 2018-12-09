@@ -64,6 +64,7 @@ extern Adafruit_ST7735 tft;
 long rep_n_samples;
 long rep_max_pressure;
 long rep_sum_pressure;
+bool rep_stop_good;
 
 void runStartEnter();
 void runIgExit();
@@ -137,6 +138,7 @@ void runStartEnter()
 	rep_n_samples = 0;
 	rep_max_pressure = 0;
 	rep_sum_pressure = 0;
+	rep_stop_good = false;
 	o_daq0->cur_state = on;	// goes on at commanded start
 
 	at_pressure_t = 0;
@@ -356,6 +358,8 @@ const struct state * runIgRunCheck()
 	// Keep going until either too much time has passed or we flame out
 	if (p >= good_pressure && t <= ig_run_time)
 		return current_state;
+	if (p >= good_pressure)
+		rep_stop_good = true;
 	return &igRunReport;
 }
 
@@ -366,6 +370,7 @@ const struct state * runIgRunCheck()
  *	time at first pressure
  *	ave pressure
  *	max pressure
+ *	stop condition (red or green)
  */
 void igReportEnter()
 {
@@ -380,11 +385,20 @@ void igReportEnter()
 	tft.setCursor(20, 1 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
 	tft.print("tt: "); tft.print(loop_start_t - test_start_t);
 	tft.setCursor(20, 2 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
+
+	// Run time is reported in red if we stopped on flame out,
+	// green if we stopped on time
+	if (rep_stop_good)
+		tft.setTextColor(ST7735_GREEN);
+	else
+		tft.setTextColor(ST7735_RED);
 	tft.print("rt: ");
 	if (at_pressure_t)
 		tft.print(loop_start_t - at_pressure_t);
 	else
 		tft.print("none");
+
+	tft.setTextColor(ST7735_WHITE);
 	tft.setCursor(20, 3 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
 	tft.print("mx: "); tft.print(rep_max_pressure);
 	tft.setCursor(20, 4 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
