@@ -134,7 +134,7 @@ allAborts()
 	}
 
 	// p is the filtered pressure (counts * 4)
-	p = i_ig_pressure->filter_a - zero_offset;
+	p = i_ig_pressure->filter_a;
 
 	if (!SENSOR_SANE(p)) {
 		event(IgPressFail);
@@ -252,7 +252,7 @@ const struct state * sequenceEntryCheck()
 	o_amberStatus->cur_state = off;
 	o_redStatus->cur_state = on;
 
-	p = i_ig_pressure->filter_a - zero_offset;
+	p = i_ig_pressure->filter_a;
 	if (!SENSOR_SANE(p))
 		return error_state(errorIgPressureInsane);
 
@@ -493,7 +493,7 @@ sequenceIgPressureCheck()
 	}
 	
 	// p is the filtered pressure (counts * 4)
-	p = i_ig_pressure->filter_a - zero_offset;
+	p = i_ig_pressure->filter_a;
 	pressGood = (p >= good_pressure);
 
 	// process transitions of ig pressure above/below threshold.
@@ -580,7 +580,7 @@ sequenceMainValvesStartCheck()
 	if (es)
 		return es;
 
-	p = i_ig_pressure->filter_a - zero_offset;
+	p = i_ig_pressure->filter_a;
 	if (p < good_pressure) {
 		event(IgFail2);
 		return error_state(errorIgFlameOut);
@@ -676,7 +676,7 @@ sequenceMVFullCheck()
 		return es;
 
 	// Check that ig pressure is not below chamber pressure.
-	if (i_ig_pressure->filter_a - zero_offset < i_main_press->filter_a - pressure_delta_allowed)
+	if (i_ig_pressure->filter_a < i_main_press->filter_a - pressure_delta_allowed)
 		return error_state(errorIgTooLow);
 
 	t = loop_start_t - full_time;
