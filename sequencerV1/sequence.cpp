@@ -138,13 +138,13 @@ allAborts()
 
 	if (!SENSOR_SANE(p)) {
 		event(IgPressFail);
-		return error_state(errorIgPressureInsane);
+		return error_state(errorIgPressureInsane, p);
 	}
 
 	// abort if pressure sensor broken
 	if (p < min_pressure || p > max_pressure) {
 		event(IgPressFail);
-		return error_state(errorIgNoPressure);
+		return error_state(errorIgNoPressure, p);
 	}
 
 	// p is the filtered pressure (counts * 4)
@@ -152,14 +152,14 @@ allAborts()
 
 	if (!SENSOR_SANE(p)) {
 		event(MainPressFail);
-		return error_state(errorMainPressureInsane);
+		return error_state(errorMainPressureInsane, p);
 	}
 
 	// abort if pressure sensor broken
 	if (p < min_pressure || p > max_pressure) {
 /*xxx*/Serial.print("MAIN ABORT:  p=");Serial.print(p);Serial.print("  min_pressure=");Serial.println(min_pressure);
 		event(MainPressFail);
-		return error_state(errorMainNoPressure);
+		return error_state(errorMainNoPressure, p);
 	}
 
 	return NULL;
@@ -254,20 +254,20 @@ const struct state * sequenceEntryCheck()
 
 	p = i_ig_pressure->filter_a;
 	if (!SENSOR_SANE(p))
-		return error_state(errorIgPressureInsane);
+		return error_state(errorIgPressureInsane, p);
 
 	if (p < min_pressure || p > max_idle_pressure)
-		return error_state(errorIgNoPressure);
+		return error_state(errorIgNoPressure, p);
 
 	p = i_main_press->filter_a;
 	if (!SENSOR_SANE(p))
-		return error_state(errorMainPressureInsane);
+		return error_state(errorMainPressureInsane, p);
 
 	if (p < min_pressure || p > max_idle_pressure) {
 /*xxx*/Serial.print("MAIN ABORT 2:  p=");Serial.print(p);Serial.print("  min_pressure=");Serial.print(min_pressure);Serial.print("  max_idle_pressure=");Serial.println(max_idle_pressure);
 /*xxx*/Serial.print("  i_main_press->filter_a = ");Serial.println(i_main_press->filter_a);
 /*xxx*/Serial.print("  pin = ");Serial.println(i_main_press->pin);
-		return error_state(errorMainNoPressure);
+		return error_state(errorMainNoPressure, p);
 	}
 
 	/*
@@ -583,7 +583,7 @@ sequenceMainValvesStartCheck()
 	p = i_ig_pressure->filter_a;
 	if (p < good_pressure) {
 		event(IgFail2);
-		return error_state(errorIgFlameOut);
+		return error_state(errorIgFlameOut, p);
 	}
 
 	t = loop_start_t - pressstate_time;
@@ -612,7 +612,7 @@ sequenceMainValvesStartCheck()
 	t = loop_start_t - time_M;
 	if (t >= main_pressure_time) {
 		event(MainFail0);
-		return error_state(errorSeqNoMain);
+		return error_state(errorSeqNoMain, t);
 	}
 
 	// sequence opening the main valves

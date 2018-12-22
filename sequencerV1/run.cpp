@@ -197,13 +197,13 @@ static const struct state * allAborts()
 
 	if (!SENSOR_SANE(p)) {
 		event(IgPressFail);
-		return error_state(errorIgPressureInsane);
+		return error_state(errorIgPressureInsane, p);
 	}
 
 	// abort if pressure sensor broken
 	if (p < min_pressure) {
 		event(IgPressFail);
-		return error_state(errorIgNoPressure);
+		return error_state(errorIgNoPressure, p);
 	}
 
 	// p is the filtered pressure (counts * 4)
@@ -211,13 +211,13 @@ static const struct state * allAborts()
 
 	if (!SENSOR_SANE(p)) {
 		event(MainPressFail);
-		return error_state(errorMainPressureInsane);
+		return error_state(errorMainPressureInsane, p);
 	}
 
 	// abort if pressure sensor broken
 	if (p < min_pressure) {
 		event(MainPressFail);
-		return error_state(errorMainNoPressure);
+		return error_state(errorMainNoPressure, p);
 	}
 
 	return NULL;
@@ -315,7 +315,7 @@ const struct state * runIgPressCheck()
 
 	// If no ignition and too much time has passed, give up with an error
 	if (t > ig_pressure_time)
-		return error_state(errorIgNoIg);
+		return error_state(errorIgNoIg, (unsigned int)t);
 	
 	// keep waiting
 	return current_state;

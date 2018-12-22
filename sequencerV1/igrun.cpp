@@ -186,10 +186,10 @@ const struct state * igLocalTestEntryCheck()
 
 	p = i_ig_pressure->filter_a;
 	if (!SENSOR_SANE(p))
-		return error_state(errorIgPressureInsane);
+		return error_state(errorIgPressureInsane, p);
 
 	if (p < min_pressure || p > max_idle_pressure)
-		return error_state(errorIgNoPressure);
+		return error_state(errorIgNoPressure, p);
 
 	if (joystick_edge_value == JOY_PRESS)
 		return tft_menu_machine(&main_menu);
@@ -217,11 +217,11 @@ const struct state * igRemoteTestEntryCheck()
 
 	p = i_ig_pressure->filter_a;
 	if (!SENSOR_SANE(p))
-		return error_state(errorIgPressureInsane);
+		return error_state(errorIgPressureInsane, p);
 
 
 	if (p < min_pressure || p > max_idle_pressure)
-		return error_state(errorIgNoPressure);
+		return error_state(errorIgNoPressure, p);
 
 	if (joystick_edge_value == JOY_PRESS)
 		return tft_menu_machine(&main_menu);
@@ -274,10 +274,10 @@ const struct state * igLongTestEntryCheck()
 
 	p = i_ig_pressure->filter_a;
 	if (!SENSOR_SANE(p))
-		return error_state(errorIgPressureInsane);
+		return error_state(errorIgPressureInsane, p);
 
 	if (p < min_pressure || p > max_idle_pressure)
-		return error_state(errorIgNoPressure);
+		return error_state(errorIgNoPressure, p);
 
 	if (joystick_edge_value == JOY_PRESS)
 		return tft_menu_machine(&main_menu);

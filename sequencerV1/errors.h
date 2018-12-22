@@ -24,5 +24,6 @@ const unsigned char errorSeqNoMain =		error_base + 14;	// sequence aborted when 
 const unsigned char errorIgTooLow =		error_base + 15;	// sequence aborted when ig pressure lower than main
 
 extern const struct state * error_state(unsigned char error_code);
+extern const struct state * error_state(unsigned char error_code, unsigned int v);
 extern void error_set_restart(const struct state *restart_state);
 extern void error_set_restartable(bool restartable);

@@ -62,6 +62,8 @@ extern Adafruit_ST7735 tft;
 extern struct menu main_menu;
 
 static unsigned char error_code;	// local copy of error code
+static unsigned int error_value;	// local copy of the error value
+static bool error_value_is_present;
 void erEnter();
 void erExit();
 const struct state *erCheck();
@@ -89,7 +91,7 @@ static unsigned long next_blink_time;
  * error number and returns the error state
  * structure
  */
-const struct state *error_state(unsigned char code)
+static const struct state *i_error_state(unsigned char code)
 {
 	error_code = code;
 
@@ -106,6 +108,19 @@ const struct state *error_state(unsigned char code)
 	trace_trigger();
 #endif
 	return &l_error_state;
+}
+
+const struct state *error_state(unsigned char code)
+{
+	error_value_is_present = false;
+	return i_error_state(code);
+}
+
+const struct state *error_state(unsigned char code, unsigned int value)
+{
+	error_value = value;
+	error_value_is_present = true;
+	return i_error_state(code);
 }
 
 /*
@@ -192,6 +207,10 @@ static void i_do_entry_stuff()
 		strcpy_P(e_msg, (char*)pgm_read_word(&(error_messages[error_code-1])));
 		tft.setCursor(0, 2 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
 		tft.print(e_msg);
+		if (error_value_is_present) {
+			tft.setCursor(0, 3 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
+			tft.print(error_value);
+		}
 	}
 
 	/*
