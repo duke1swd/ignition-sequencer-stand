@@ -42,6 +42,8 @@
  * 		menu clicking when repeated igntion tests are being run.
  */
 
+#define	NO_SENSOR 1
+
 #include "parameters.h"
 #include "state_machine.h"
 #include "errors.h"
@@ -139,10 +141,10 @@ void runStartEnter()
 	rep_max_pressure = 0;
 	rep_sum_pressure = 0;
 	rep_stop_good = false;
-	o_daq0->cur_state = on;	// goes on at commanded start
 
 	at_pressure_t = 0;
 	runMainExit();
+	o_daq0->cur_state = on;	// goes on at commanded start.  runMainExit sets this to zero
 }
 
 /*
@@ -201,10 +203,12 @@ static const struct state * allAborts()
 	}
 
 	// abort if pressure sensor broken
+#ifndef NO_SENSOR
 	if (p < min_pressure) {
 		event(IgPressFail);
 		return error_state(errorIgNoPressure, p);
 	}
+#endif
 
 	// p is the filtered pressure (counts * 4)
 	p = i_main_press->filter_a;
@@ -215,10 +219,12 @@ static const struct state * allAborts()
 	}
 
 	// abort if pressure sensor broken
+#ifndef NO_SENSOR
 	if (p < min_pressure) {
 		event(MainPressFail);
 		return error_state(errorMainNoPressure, p);
 	}
+#endif
 
 	return NULL;
 }

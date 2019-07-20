@@ -35,7 +35,11 @@ static const int good_pressure = 737;		// 50 psi gage
 //static const int max_ig_pressure = 901;		// 75 psi gage
 static const int max_ig_pressure = 1196;		// 120 psi gage
 static const int main_good_pressure = 676;	// 20 PSI gauge
+#ifdef NO_SENSOR
+#define	SENSOR_SANE(x)	1
+#else
 #define	SENSOR_SANE(x) (((int16_t)(x)) > 90 && ((uint16_t)(x)) < ((uint16_t)4000))
+#endif
 
 static const int pressure_delta_allowed = 35;	// ig pressure can be this much less than main (about 5 PSI).
 

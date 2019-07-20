@@ -9,6 +9,8 @@
  *
  */
 
+//#define NO_SENSOR	1  // used when a pressure sensor broke
+
 #include "parameters.h"
 #include "state_machine.h"
 #include "errors.h"
@@ -188,8 +190,10 @@ const struct state * igLocalTestEntryCheck()
 	if (!SENSOR_SANE(p))
 		return error_state(errorIgPressureInsane, p);
 
+#ifndef NO_SENSOR
 	if (p < min_pressure || p > max_idle_pressure)
 		return error_state(errorIgNoPressure, p);
+#endif
 
 	if (joystick_edge_value == JOY_PRESS)
 		return tft_menu_machine(&main_menu);
@@ -203,6 +207,7 @@ const struct state * igLocalTestEntryCheck()
 	igTestDisplay();
 
 	if (ls1) {
+		//o_daq1->cur_state = 1;	// QQQ
 		if (igDebug)
 			return &runIgDebug;
 		return &runStart;
@@ -220,8 +225,10 @@ const struct state * igRemoteTestEntryCheck()
 		return error_state(errorIgPressureInsane, p);
 
 
+#ifndef NO_SENSOR
 	if (p < min_pressure || p > max_idle_pressure)
 		return error_state(errorIgNoPressure, p);
+#endif
 
 	if (joystick_edge_value == JOY_PRESS)
 		return tft_menu_machine(&main_menu);
@@ -276,8 +283,10 @@ const struct state * igLongTestEntryCheck()
 	if (!SENSOR_SANE(p))
 		return error_state(errorIgPressureInsane, p);
 
+#ifndef NO_SENSOR
 	if (p < min_pressure || p > max_idle_pressure)
 		return error_state(errorIgNoPressure, p);
+#endif
 
 	if (joystick_edge_value == JOY_PRESS)
 		return tft_menu_machine(&main_menu);
