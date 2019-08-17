@@ -59,6 +59,7 @@
 
 extern void spark_run();
 extern Adafruit_ST7735 tft;
+extern long spark_bias;
 
 /*
  * Report variables
@@ -137,6 +138,7 @@ void runMainExit()
 void runStartEnter()
 {
 	test_start_t = millis();
+	spark_bias = test_start_t;
 	rep_n_samples = 0;
 	rep_max_pressure = 0;
 	rep_sum_pressure = 0;

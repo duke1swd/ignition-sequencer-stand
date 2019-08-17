@@ -22,6 +22,7 @@
 
 extern Adafruit_ST7735 tft;
 extern struct menu main_menu;
+extern long spark_bias;
 
 void igLRTestEnter();
 void igLRDebugEnter();
@@ -175,6 +176,7 @@ void common_test_enter()
 	igTestDisplay();
 	igThisTest = current_state;
 	error_set_restartable(false);
+	spark_bias = 0;
 }
 
 /*

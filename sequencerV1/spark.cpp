@@ -18,6 +18,8 @@ void sparkTestExit();
 const struct state *sparkTestCheck();
 struct state sparkTest = { "sparkTest", &sparkTestEnter, &sparkTestExit, &sparkTestCheck};
 
+unsigned long spark_bias;
+
 // local state of buttons.  Used to optimize display
 static unsigned char ls1;	// edge triggered
 static unsigned char els1;
@@ -111,6 +113,7 @@ void sparkTestEnter()
 	sparkButtonDisplay();
 	o_ipaIgValve->cur_state = off;
 	o_n2oIgValve->cur_state = off;
+	spark_bias = 0;
 }
 
 /*
@@ -123,7 +126,7 @@ void sparkTestExit()
 
 void spark_run()
 {
-	o_spark->cur_state = (loop_start_t % spark_period < spark_period/2)? on: off;
+	o_spark->cur_state = ((loop_start_t - spark_bias) % spark_period < spark_period/2)? on: off;
 }
 
 /*
