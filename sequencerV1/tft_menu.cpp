@@ -113,8 +113,10 @@ const struct state * check_j_idle()
 
 	v = i_joystick->current_val;
 
-	if (v == JOY_PRESS) 
+	if (v == JOY_PRESS) {
+		Serial.println("JSP");
 		return current_menu->items[menu_state].action_state;
+	}
 
 	if (v)
 		return &joystick_scroll;
