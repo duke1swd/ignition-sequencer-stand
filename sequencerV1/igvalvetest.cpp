@@ -130,13 +130,28 @@ void igValveTestExit()
  * If the joystick has been pressed, then leave the test.
  * Otherwise copy the input buttons to the outputs.
  */
+#define	ON_TIME	10000	// ten seconds
 const struct state * igValveTestCheck()
 {
+	unsigned char new_s1;
+	static long press_time;
 	if (joystick_edge_value == JOY_PRESS)
 		return tft_menu_machine(&main_menu);
 
 	if (safe_ok()) {
+#ifdef ON_TIME
+		new_s1 = i_push_1->current_val;
+		if (new_s1 == 1 && new_s1 != ols1)
+			press_time = loop_start_t;
+		if (new_s1 == 1 || press_time - loop_start_t < ON_TIME)
+			ls1 = 1;
+		else
+			ls1 = 0;
+
+		o_ipaIgValve->cur_state = ls1? on: off;
+#else
 		o_ipaIgValve->cur_state = (ls1 = i_push_1->current_val)? on: off;
+#endif
 		o_n2oIgValve->cur_state = (ls2 = i_push_2->current_val)? on: off;
 	}
 	igButtonDisplay();
