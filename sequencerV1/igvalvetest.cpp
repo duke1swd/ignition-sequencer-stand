@@ -9,6 +9,13 @@
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7735.h> // Hardware-specific library
 
+/*
+ * Define ON_TIME to some number of milliseconds to make the
+ * ig valve stick on when clicked.  used for flow testing.
+ * Keep it off normally.
+ */
+#define	ON_TIME	10000	// ten seconds
+
 extern Adafruit_ST7735 tft;
 extern struct menu main_menu;
 
@@ -96,6 +103,9 @@ static void igButtonDisplay()
  * Ignition valve click-test
  * On entry, clear screen and write message
  */
+#ifdef ON_TIME
+long press_time;
+#endif
 void igValveTestEnter()
 {
 	tft.fillScreen(TM_TXT_BKG_COLOR);
@@ -113,6 +123,9 @@ void igValveTestEnter()
 	ols2 = 1;
 	ls2 = 0;
 	was_safe = 0;
+#ifdef ON_TIME
+	press_time = 0;
+#endif
 	igButtonDisplay();
 }
 
@@ -130,23 +143,25 @@ void igValveTestExit()
  * If the joystick has been pressed, then leave the test.
  * Otherwise copy the input buttons to the outputs.
  */
-#define	ON_TIME	10000	// ten seconds
 const struct state * igValveTestCheck()
 {
+#ifdef ON_TIME
 	unsigned char new_s1;
-	static long press_time;
+#endif
 	if (joystick_edge_value == JOY_PRESS)
 		return tft_menu_machine(&main_menu);
 
 	if (safe_ok()) {
 #ifdef ON_TIME
 		new_s1 = i_push_1->current_val;
-		if (new_s1 == 1 && new_s1 != ols1)
-			press_time = loop_start_t;
-		if (new_s1 == 1 || press_time - loop_start_t < ON_TIME)
+		if (new_s1 == 1 && press_time == 0)
+			press_time = loop_start_t + ON_TIME;
+		if (new_s1 == 1 || press_time > loop_start_t)
 			ls1 = 1;
-		else
+		else {
 			ls1 = 0;
+			press_time = 0;
+		}
 
 		o_ipaIgValve->cur_state = ls1? on: off;
 #else
