@@ -38,6 +38,7 @@
 
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7735.h> // Hardware-specific library
+#include "trace.h"
 
 /*
  *  Pin definitions for the TFT board
@@ -88,8 +89,10 @@ extern struct state igLongTestEntry;
 extern struct state flowTest;
 extern struct state sequenceEntry;
 extern struct state eventsToSerial;
+#ifdef TRACE
 extern struct state traceToSerial;
 extern struct state traceTest;
+#endif
 extern struct state powerTest;
 
 /*
@@ -110,10 +113,12 @@ const struct menu_item main_menu_items[] = {
      &traceToSerial,
   },
 #endif
+#ifdef TRACE
   {
      "Trace Test",
      &traceTest,
   },
+#endif
   {
      "Ig Local Debug",
      &igLocalDebugEntry,
@@ -209,7 +214,9 @@ static void joystick_edge_trigger()
 void setup() {
   void mainValveInit();
   void event_init();
+#ifdef TRACE
   void trace_init();
+#endif
   void myPanic(const char *msg);
 
   Serial.begin(9600);
@@ -220,7 +227,9 @@ void setup() {
   setup_inputs();
   setup_outputs();
   event_init();
+#ifdef TRACE
   trace_init();
+#endif
   digitalWrite(o_powerStatus->pin, HIGH);
   if (!validate_io())
     myPanic("Invalid I/O Setup");

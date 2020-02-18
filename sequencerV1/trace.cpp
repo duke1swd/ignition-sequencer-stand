@@ -13,6 +13,8 @@
 #include "trace.h"
 #include "eepromlocal.h"
 
+#ifdef TRACE
+
 #define	TRACE_SIZE	100	// must fit in an unsigned char
 #define	TRACE_POST	50
 
@@ -187,3 +189,4 @@ bool trace_to_serial(int i) {
 
 	return false;
 }
+#endif

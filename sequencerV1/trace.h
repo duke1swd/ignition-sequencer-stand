@@ -3,6 +3,12 @@
  */
 
 /*
+ * For now, do not define trace.  It costs us too much local memory, and things break.
+ */
+//#define TRACE 1
+#ifdef TRACE
+
+/*
  * Some interesting pins:
  * 	A1 = main pressure
  * 	A2 = ig pressure
@@ -19,3 +25,4 @@ bool trace_done();
 void trace_point(int data);
 unsigned int trace_commit();
 bool trace_to_serial(int i);
+#endif

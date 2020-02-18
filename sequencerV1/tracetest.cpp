@@ -12,6 +12,8 @@
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7735.h> // Hardware-specific library
 
+#ifdef TRACE
+
 extern Adafruit_ST7735 tft;
 extern struct menu main_menu;
 
@@ -106,3 +108,4 @@ const struct state * traceTestCheck()
 
 	return current_state;
 }
+#endif

@@ -205,9 +205,11 @@ void handle_cmd() {
         out->cur_state = (output_state)v;
       }      
     }
+ #ifdef TRACE
   } else if (strcmp(cmd_str, "tracedump") == 0) {
     for (int i = 0; !trace_to_serial(i); i++) ;
     Serial.println("Done printing trace");
+ #endif
   } else if (strcmp(cmd_str, "state") == 0) {
     Serial.print("Current state: ");
     Serial.println(current_state->name);
