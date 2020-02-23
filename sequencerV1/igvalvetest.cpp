@@ -14,7 +14,7 @@
  * ig valve stick on when clicked.  used for flow testing.
  * Keep it off normally.
  */
-#define	ON_TIME	10000	// ten seconds
+#define	ON_TIME	5000	// 5 seconds
 
 extern Adafruit_ST7735 tft;
 extern struct menu main_menu;
@@ -152,22 +152,24 @@ const struct state * igValveTestCheck()
 		return tft_menu_machine(&main_menu);
 
 	if (safe_ok()) {
-#ifdef ON_TIME
-		new_s1 = i_push_1->current_val;
-		if (new_s1 == 1 && press_time == 0)
-			press_time = loop_start_t + ON_TIME;
-		if (new_s1 == 1 || press_time > loop_start_t)
-			ls1 = 1;
-		else {
-			ls1 = 0;
-			press_time = 0;
-		}
-
-		o_ipaIgValve->cur_state = ls1? on: off;
-#else
-		o_ipaIgValve->cur_state = (ls1 = i_push_1->current_val)? on: off;
-#endif
 		o_n2oIgValve->cur_state = (ls2 = i_push_2->current_val)? on: off;
+#ifdef ON_TIME
+		// If the N2O valve button is down, then click IPA valve for ON_TIME
+		if (press_time > 0 || o_n2oIgValve->cur_state == on) {
+			new_s1 = i_push_1->current_val;
+			if (new_s1 == 1 && press_time == 0)
+				press_time = loop_start_t + ON_TIME;
+			if (new_s1 == 1 || press_time > loop_start_t)
+				ls1 = 1;
+			else {
+				ls1 = 0;
+				press_time = 0;
+			}
+
+			o_ipaIgValve->cur_state = ls1? on: off;
+		} else 
+#endif
+			o_ipaIgValve->cur_state = (ls1 = i_push_1->current_val)? on: off;
 	}
 	igButtonDisplay();
 
