@@ -63,26 +63,26 @@ static void flowButtonDisplay()
 	/*
 	 * Else display the input state
 	 */
-	if (ls1 != ols1) {
-		// Erase the display area to correct color.
-		// parameters are x,y of upper left, follwed by width and height
-		// then color
-		c = ls1? ST7735_RED: TM_TXT_BKG_COLOR;
-		tft.fillRect(0, 96, 64, 32, c);	// erase the display spot
-		tft.setCursor(4, 100);
-		tft.print("N2O");
-		ols1 = ls1;
-	}
-
 	if (ls2 != ols2) {
 		// Erase the display area to correct color.
 		// parameters are x,y of upper left, follwed by width and height
 		// then color
 		c = ls2? ST7735_RED: TM_TXT_BKG_COLOR;
+		tft.fillRect(0, 96, 64, 32, c);	// erase the display spot
+		tft.setCursor(4, 100);
+		tft.print("N2O");
+		ols1 = ls2;
+	}
+
+	if (ls1 != ols1) {
+		// Erase the display area to correct color.
+		// parameters are x,y of upper left, follwed by width and height
+		// then color
+		c = ls1? ST7735_RED: TM_TXT_BKG_COLOR;
 		tft.fillRect(96, 96, 64, 32, c);	// erase the display spot
 		tft.setCursor(100, 100);
 		tft.print("IPA");
-		ols2 = ls2;
+		ols1 = ls1;
 	}
 }
 
