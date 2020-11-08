@@ -32,6 +32,17 @@
  * then when we come back here daq 0 will be set low again.
  */
 
+#define	LOCAL_RUN	1	// debugging.  Allows run from pushbutton
+
+#ifdef LOCAL_RUN
+#define	I1	i_push_1
+#define	I2	i_push_2
+#else
+#define	I1	i_cmd_1
+#define	I2	i_cmd_2
+#endif
+
+
 #include "parameters.h"
 #include "state_machine.h"
 #include "errors.h"
@@ -113,10 +124,10 @@ allAborts()
 
 	// Operator aborts
 	if (joystick_edge_value == JOY_PRESS ||
-			i_cmd_2->edge == rising ||
+			I2->edge == rising ||
 			i_push_1->current_val ||
 			i_push_2->current_val) {
-		i_cmd_2->edge = no_edge;
+		I2->edge = no_edge;
 		event(OpAbort);
 		return error_state(errorSeqOpAbort);
 	}
@@ -196,11 +207,17 @@ void sequenceEntryEnter()
 	tft.setTextColor(TM_TXT_HIGH_COLOR);
 	tft.print(" = ");
 	tft_print_seconds(main_run_time);
+
+#ifdef LOCAL_RUN
+	tft.setCursor(20, TM_TXT_HEIGHT+34+TM_TXT_OFFSET);
+	tft.setTextColor(TM_TXT_HIGH_COLOR);
+	tft.print("LOCAL RUN");
+#endif
 	
 	enter_screen_redraw = true;	// force screen redraw
 	was_safe = false;
 	was_power = false;
-	i_cmd_2->edge = no_edge;
+	I2->edge = no_edge;
 
 	error_set_restart(&sequenceEntry);
 	error_set_restartable(true);
@@ -241,10 +258,10 @@ const struct state * sequenceEntryCheck()
 
 	// copy the command input button to the daq.
 	// This allows remote daq start.
-	o_daq0->cur_state = (i_cmd_1->current_val == 1? on: off);
+	o_daq0->cur_state = (I1->current_val == 1? on: off);
 
 	// run spark while "GO" button is held
-	if (i_cmd_1->current_val == 1)
+	if (I1->current_val == 1)
 		spark_run();
 
 	// until proven otherwise, LEDs indicate not-ready
@@ -311,16 +328,20 @@ const struct state * sequenceEntryCheck()
 
 	// erase the error and replace with a green rectangle
 	if (was_safe || was_power || enter_screen_redraw) {
+#ifdef LOCAL_RUN
+		tft.fillRect(0,96,160,32, ST7735_BLUE);
+#else
 		tft.fillRect(0,96,160,32, ST7735_GREEN);
+#endif
 		was_safe = false;
 		was_power = false;
 		enter_screen_redraw = false;
 	}
 
 	// If the 'fire' button pressed, then it is time to go.
-	if (i_cmd_2->current_val) {
+	if (I2->current_val) {
 		event_enable();
-		i_cmd_2->edge = no_edge; // sequence will abort of rising edge of i_cmd_2
+		I2->edge = no_edge; // sequence will abort of rising edge of I2
 		return &sequenceIgLight;
 	}
 
