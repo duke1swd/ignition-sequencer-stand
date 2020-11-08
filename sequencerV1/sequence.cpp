@@ -125,8 +125,10 @@ allAborts()
 	// Operator aborts
 	if (joystick_edge_value == JOY_PRESS ||
 			I2->edge == rising ||
-			i_push_1->current_val ||
-			i_push_2->current_val) {
+#ifndef LOCAL_RUN
+			i_push_2->current_val ||
+#endif
+			i_push_1->current_val) {
 		I2->edge = no_edge;
 		event(OpAbort);
 		return error_state(errorSeqOpAbort);
