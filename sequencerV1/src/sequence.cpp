@@ -32,7 +32,7 @@
  * then when we come back here daq 0 will be set low again.
  */
 
-#define	LOCAL_RUN	1	// debugging.  Allows run from pushbutton
+//#define	LOCAL_RUN	1	// debugging.  Allows run from pushbutton
 
 #ifdef LOCAL_RUN
 #define	I1	i_push_1
