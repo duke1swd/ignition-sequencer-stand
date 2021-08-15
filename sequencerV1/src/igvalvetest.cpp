@@ -14,7 +14,7 @@
  * ig valve stick on when clicked.  used for flow testing.
  * Keep it off normally.
  */
-#define	ON_TIME	5000	// 5 seconds
+//#define	ON_TIME	5000	// 5 seconds
 
 extern Adafruit_ST7735 tft;
 extern struct menu main_menu;
