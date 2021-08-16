@@ -223,6 +223,7 @@ void sequenceEntryEnter()
 
 	error_set_restart(&sequenceEntry);
 	error_set_restartable(true);
+	event_init();
 }
 
 /*
