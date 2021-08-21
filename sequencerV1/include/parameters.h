@@ -17,7 +17,7 @@ static const int ipa_crack = ipa_close + SERVO_CRACK;
 static const int ipa_partial = ipa_close + 33+10;
 static const int ipa_open = ipa_close + SERVO_OPEN;
 
-static const int n2o_close = 47 + 15;
+static const int n2o_close = 20;
 static const int n2o_crack = n2o_close + SERVO_CRACK;
 static const int n2o_partial = n2o_close + 37+10;
 static const int n2o_open = n2o_close + SERVO_OPEN;
