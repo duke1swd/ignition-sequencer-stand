@@ -21,6 +21,9 @@
  *		This state dumps the event log to the DAQ.
  */
 
+/* NO MAIN FAIL ENABLED */
+#define NOMAINFAIL 1
+
 /*
  * NOTES on daq output line control
  *
@@ -636,7 +639,15 @@ sequenceMainValvesStartCheck()
 	t = loop_start_t - time_M;
 	if (t >= main_pressure_time) {
 		event(MainFail0);
-		return error_state(errorSeqNoMain, t);
+#ifdef NOMAINFAIL
+			event(MainPartialOK);
+			mainPressWasGood = true;
+			pressstate_time = loop_start_t;
+				closeMainOnExit = false;
+				return &sequenceMVFull;
+#else
+		return error_state(errorSeqNoMain, p);
+#endif
 	}
 
 	// sequence opening the main valves
