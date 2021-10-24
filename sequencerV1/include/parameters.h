@@ -34,7 +34,7 @@ static const int max_idle_pressure = 470;	// 0 psi gage, plus big margin for err
 static const int good_pressure = 737;		// 50 psi gage
 //static const int max_ig_pressure = 901;		// 75 psi gage
 static const int max_ig_pressure = 1196;		// 120 psi gage
-static const int main_good_pressure = 676;	// 20 PSI gauge
+static const int main_good_pressure = 615;	// 35 PSI absolute
 #ifdef NO_SENSOR
 #define	SENSOR_SANE(x)	1
 #else
