@@ -49,7 +49,7 @@ static void traceTestDisplay()
 		if (was_safe == 0) {
 			tft.fillRect(0,96,160,32, ST7735_RED);
 			tft.setCursor(12, 100);
-			tft.print("SAFE ERR");
+			tft.print(F("SAFE ERR"));
 			was_safe = 1;
 		}
 		return;
@@ -58,7 +58,7 @@ static void traceTestDisplay()
 	if (was_safe) {
 		tft.fillRect(0, 96, 160, 32, TM_TXT_BKG_COLOR);
 		tft.setCursor(4, 100);
-		tft.print("Stop");
+		tft.print(F("Stop"));
 		was_safe = 0;
 	}
 }
@@ -73,13 +73,13 @@ void traceTestEnter()
 	tft.setTextSize(TM_TXT_SIZE+1);
 	tft.setCursor(8, TM_TXT_OFFSET);
 	tft.setTextColor(TM_TXT_FG_COLOR);
-	tft.print("Trace");
+	tft.print(F("Trace"));
 	tft.setTextSize(TM_TXT_SIZE);
 	tft.setCursor(20, TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
 	tft.setTextColor(TM_TXT_HIGH_COLOR);
-	tft.print("Trace Test");
+	tft.print(F("Trace Test"));
 	tft.setCursor(20, 3 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
-	tft.print("running");
+	tft.print(F("running"));
 
 	i_push_1->edge = no_edge;
 	was_safe = 0;

@@ -19,7 +19,7 @@
  * Error numbers are defined in errors.h
  * Bad things happen if these messages are longer than 15 characters
  */
-//                             |xxx xxx xxx xxx|
+//                              |xxx xxx xxx xxx|
 const char e_msg_0[]  PROGMEM = "Oper Abrt";		// test aborted by operator
 const char e_msg_1[]  PROGMEM = "SAFE Abrt";		// test aborted by safe switch
 const char e_msg_2[]  PROGMEM = "Ig Sensor Range";	// idle pressure out of range
@@ -56,7 +56,7 @@ const char * const error_messages[] PROGMEM = {
 	e_msg_15,
 };
 
-char e_msg[16];
+extern char global_msg_buf[16];
 
 extern Adafruit_ST7735 tft;
 extern struct menu main_menu;
@@ -197,16 +197,16 @@ static void i_do_entry_stuff()
 	tft.setCursor(8, TM_TXT_OFFSET);
 	// text is white
 	tft.setTextColor(ST7735_WHITE);
-	tft.print("ERROR");
+	tft.print(F("ERROR"));
 	tft.setTextSize(TM_TXT_SIZE);
 	tft.setCursor(20, TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
 	tft.print(error_code);
 
 	// load up and display the error message
 	if (error_code >= 1 && error_code <= NUM_ERRORS) {
-		strcpy_P(e_msg, (char*)pgm_read_word(&(error_messages[error_code-1])));
+		strcpy_P(global_msg_buf, (char*)pgm_read_word(&(error_messages[error_code-1])));
 		tft.setCursor(0, 2 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
-		tft.print(e_msg);
+		tft.print(global_msg_buf);
 		if (error_value_is_present) {
 			tft.setCursor(0, 3 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
 			tft.print(error_value);

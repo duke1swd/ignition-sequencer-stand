@@ -77,7 +77,7 @@ static void powerDisplay()
 		if (was_safe == 0) {
 			tft.fillRect(0,LOWER_DISP - 4,160,128- LOWER_DISP, ST7735_RED);
 			tft.setCursor(12, LOWER_DISP);
-			tft.print("SAFE ERR");
+			tft.print(F("SAFE ERR"));
 			was_safe = 1;
 		}
 		return;
@@ -120,7 +120,7 @@ static void powerDisplay()
 		c = ls1? ST7735_RED: TM_TXT_BKG_COLOR;
 		tft.fillRect(0, 96, 64, 32, c);	// erase the display spot
 		tft.setCursor(4, LOWER_DISP);
-		tft.print("Min");
+		tft.print(F("Min"));
 		ols1 = ls1;
 	}
 
@@ -131,7 +131,7 @@ static void powerDisplay()
 		c = ls2? ST7735_RED: TM_TXT_BKG_COLOR;
 		tft.fillRect(96, 96, 64, 32, c);	// erase the display spot
 		tft.setCursor(100, LOWER_DISP);
-		tft.print("Ig ");
+		tft.print(F("Ig "));
 		ols2 = ls2;
 	}
 }
@@ -146,16 +146,16 @@ void powerTestEnter()
 	tft.setTextSize(TM_TXT_SIZE+1);
 	tft.setCursor(32, TM_TXT_OFFSET);
 	tft.setTextColor(TM_TXT_HIGH_COLOR);
-	tft.print("POWER");
+	tft.print(F("POWER"));
 	tft.setTextSize(TM_TXT_SIZE);
 	tft.setCursor(32, TM_TXT_HEIGHT+12+TM_TXT_OFFSET);
-	tft.print("Monitor");
+	tft.print(F("Monitor"));
 	tft.setTextSize(DISP_TXT);
 	tft.setCursor(DISP_LABEL_X, ROW1_DISP);
 	tft.setTextColor(TM_TXT_FG_COLOR);
-	tft.print("Pwr=");
+	tft.print(F("Pwr="));
 	tft.setCursor(DISP_LABEL_X, ROW2_DISP);
-	tft.print("Min=");
+	tft.print(F("Min="));
 
 	// force the display routine to refresh to state "off"
 	ols1 = 1;

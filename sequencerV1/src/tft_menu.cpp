@@ -17,6 +17,8 @@
 static unsigned char menu_state = 0;
 static const struct menu * current_menu;
 
+extern char global_msg_buf[16];	// buffer used for getting strings from program memory
+
 /*
  * This machine has three states, one for when a joystick button is pressed, and one for
  * when the joystick button is not pressed.
@@ -80,7 +82,8 @@ static void screen_paint()
 			if (row == menu_state)
 				txt_color = TM_TXT_HIGH_COLOR;
 			tft.setTextColor(txt_color);
-			tft.print(current_menu->items[row].menu_text);
+			strcpy_P(global_msg_buf, current_menu->items[row].menu_text);
+			tft.print(global_msg_buf);
 		}
 	}
 }

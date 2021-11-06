@@ -22,7 +22,7 @@
 #include <Adafruit_ST7735.h> // Hardware-specific library
 
 struct menu_item {
-	const char * const menu_text;
+	const char * const PROGMEM menu_text;
 	const struct state * const action_state;
 };
 

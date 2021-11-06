@@ -388,10 +388,10 @@ void igReportEnter()
 	tft.setCursor(8, TM_TXT_OFFSET);
 	// text is white
 	tft.setTextColor(ST7735_WHITE);
-	tft.print("REPORT");
+	tft.print(F("REPORT"));
 	tft.setTextSize(TM_TXT_SIZE);
 	tft.setCursor(20, 1 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
-	tft.print("tt: "); tft.print(loop_start_t - test_start_t);
+	tft.print(F("tt: ")); tft.print(loop_start_t - test_start_t);
 	tft.setCursor(20, 2 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
 
 	// Run time is reported in red if we stopped on flame out,
@@ -400,17 +400,17 @@ void igReportEnter()
 		tft.setTextColor(ST7735_GREEN);
 	else
 		tft.setTextColor(ST7735_RED);
-	tft.print("rt: ");
+	tft.print(F("rt: "));
 	if (at_pressure_t)
 		tft.print(loop_start_t - at_pressure_t);
 	else
-		tft.print("none");
+		tft.print(F("none"));
 
 	tft.setTextColor(ST7735_WHITE);
 	tft.setCursor(20, 3 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
-	tft.print("mx: "); tft.print(rep_max_pressure);
+	tft.print(F("mx: ")); tft.print(rep_max_pressure);
 	tft.setCursor(20, 4 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
-	tft.print("av: "); tft.print(rep_sum_pressure/rep_n_samples);
+	tft.print(F("av: ")); tft.print(rep_sum_pressure/rep_n_samples);
 }
 
 /*

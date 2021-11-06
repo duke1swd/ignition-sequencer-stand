@@ -50,7 +50,7 @@ static void sparkButtonDisplay()
 		if (was_safe == 0) {
 			tft.fillRect(0,96,160,32, ST7735_RED);
 			tft.setCursor(12, 100);
-			tft.print("SAFE ERR");
+			tft.print(F("SAFE ERR"));
 			was_safe = 1;
 		}
 		return;
@@ -72,7 +72,7 @@ static void sparkButtonDisplay()
 		c = ls1? ST7735_RED: TM_TXT_BKG_COLOR;
 		tft.fillRect(0, 96, 64, 32, c);	// erase the display spot
 		tft.setCursor(4, 100);
-		tft.print("one");
+		tft.print(F("one"));
 		ols1 = ls1;
 	}
 
@@ -83,13 +83,13 @@ static void sparkButtonDisplay()
 		c = ls2? ST7735_RED: TM_TXT_BKG_COLOR;
 		tft.fillRect(96, 96, 64, 32, c);	// erase the display spot
 		tft.setCursor(100, 100);
-		tft.print("RUN");
+		tft.print(F("RUN"));
 		ols2 = ls2;
 	}
 }
 
 /*
- * Ignition valve click-test
+ * Spark test entry
  * On entry, clear screen and write message
  */
 void sparkTestEnter()
@@ -98,7 +98,7 @@ void sparkTestEnter()
 	tft.setTextSize(TM_TXT_SIZE+1);
 	tft.setCursor(32, TM_TXT_OFFSET);
 	tft.setTextColor(TM_TXT_FG_COLOR);
-	tft.print("SPARK");
+	tft.print(F("SPARK"));
 	tft.setTextSize(TM_TXT_SIZE);
 	tft.setCursor(50, TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
 	tft.setTextColor(TM_TXT_HIGH_COLOR);

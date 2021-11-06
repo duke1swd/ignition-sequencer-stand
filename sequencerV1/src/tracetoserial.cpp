@@ -51,7 +51,7 @@ static void traceDumpDisplay()
 		if (was_safe == 0) {
 			tft.fillRect(0,96,160,32, ST7735_RED);
 			tft.setCursor(12, 100);
-			tft.print("SAFE ERR");
+			tft.print(F("SAFE ERR"));
 			was_safe = 1;
 		}
 		return;
@@ -82,11 +82,11 @@ void traceDumpEnter()
 	tft.setTextSize(TM_TXT_SIZE+1);
 	tft.setCursor(8, TM_TXT_OFFSET);
 	tft.setTextColor(TM_TXT_FG_COLOR);
-	tft.print("Trace");
+	tft.print(F("Trace"));
 	tft.setTextSize(TM_TXT_SIZE);
 	tft.setCursor(20, TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
 	tft.setTextColor(TM_TXT_HIGH_COLOR);
-	tft.print("Trace to Serial");
+	tft.print(F("Trace to Serial"));
 
 	running = true;
 

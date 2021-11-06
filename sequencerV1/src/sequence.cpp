@@ -204,19 +204,19 @@ void sequenceEntryEnter()
 	tft.setTextSize(TM_TXT_SIZE+1);
 	tft.setCursor(8, TM_TXT_OFFSET);
 	tft.setTextColor(TM_TXT_HIGH_COLOR);
-	tft.print("Main Sequence");
+	tft.print(F("Main Sequence"));
 	tft.setTextSize(TM_TXT_SIZE);
 	tft.setCursor(20, TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
 	tft.setTextColor(TM_TXT_FG_COLOR);
-	tft.print("RUN");
+	tft.print(F("RUN"));
 	tft.setTextColor(TM_TXT_HIGH_COLOR);
-	tft.print(" = ");
+	tft.print(F(" = "));
 	tft_print_seconds(main_run_time);
 
 #ifdef LOCAL_RUN
 	tft.setCursor(20, TM_TXT_HEIGHT+34+TM_TXT_OFFSET);
 	tft.setTextColor(TM_TXT_HIGH_COLOR);
-	tft.print("LOCAL RUN");
+	tft.print(F("LOCAL RUN"));
 #endif
 	
 	enter_screen_redraw = true;	// force screen redraw
@@ -307,7 +307,7 @@ const struct state * sequenceEntryCheck()
 			tft.fillRect(0,96,160,32, ST7735_RED);
 			tft.setCursor(12, 100);
 			tft.setTextColor(ST7735_WHITE);
-			tft.print("NO POWER");
+			tft.print(F("NO POWER"));
 			was_power = true;
 		}
 		return (current_state);
@@ -318,7 +318,7 @@ const struct state * sequenceEntryCheck()
 			tft.fillRect(0,96,160,32, ST7735_RED);
 			tft.setCursor(12, 100);
 			tft.setTextColor(ST7735_WHITE);
-			tft.print("SAFE ERR");
+			tft.print(F("SAFE ERR"));
 			was_safe = true;
 		}
 		return (current_state);

@@ -96,79 +96,106 @@ extern struct state traceTest;
 extern struct state powerTest;
 
 /*
+ * Menu item names.  MUST NOT EXCEED 15 characters
+ */
+//                                           |xxx xxx xxx xxx|
+const char m_msg_main_sequence[]   PROGMEM = "Main Sequence";
+const char m_msg_dump_events[]     PROGMEM = "Dump Events";
+#ifdef notdef	// trace now accessed from debug command
+const char m_msg_dump_trace[]      PROGMEM = "Dump Trace";
+#endif
+#ifdef TRACE
+const char m_msg_trace_test[]      PROGMEM = "Trace Test";
+#endif
+const char m_msg_ig_local_debug[]  PROGMEM = "Ig Local Debug";
+const char m_msg_ig_remote_debug[] PROGMEM = "Ig Remote Debug";
+const char m_msg_ig_long_test[]    PROGMEM = "Ig Long Test";
+const char m_msg_flow_testing[]    PROGMEM = "Flow Testing";
+const char m_msg_ig_valve_test[]   PROGMEM = "Ig Valve Test";
+const char m_msg_spark_test[]      PROGMEM = "Spark Test";
+const char m_msg_pressure_sensor[] PROGMEM = "Pressure Sensor";
+const char m_msg_main_valve_test[] PROGMEM = "Main Valve Test";
+const char m_msg_remote_echo[]     PROGMEM = "Remote Echo";
+const char m_msg_local_opto[]      PROGMEM = "Local Opto";
+const char m_msg_local_igniter[]   PROGMEM = "Local Igniter";
+const char m_msg_remote_igniter[]  PROGMEM = "Remote Igniter";
+const char m_msg_power_voltage[]   PROGMEM = "Power Voltage";
+char global_msg_buf[16];
+
+/*
  * Main menu
  */
 const struct menu_item main_menu_items[] = {
   {
-     "Main Sequence",
+     m_msg_main_sequence,
      &sequenceEntry,
   },
   {
-     "Dump Events",
+     m_msg_dump_events,
      &eventsToSerial,
   },
 #ifdef notdef	// trace now accessed from debug command
   {
-     "Dump Trace",
+     m_msg_dump_trace,
      &traceToSerial,
   },
 #endif
 #ifdef TRACE
   {
-     "Trace Test",
+     m_msg_trace_test,
      &traceTest,
   },
 #endif
   {
-     "Ig Local Debug",
+     m_msg_ig_local_debug,
      &igLocalDebugEntry,
   },
   {
-     "Ig Remote Debug",
+     m_msg_ig_remote_debug,
      &igRemoteDebugEntry,
   },
   {
-     "Ig Long Test",
+     m_msg_ig_long_test,
      &igLongTestEntry,
   },
   {
-     "Flow Testing",
+     m_msg_flow_testing,
      &flowTest,
   },
   {
-     "Ig Valve Test",
+     m_msg_ig_valve_test,
      &igValveTest,
   },
   {
-     "Spark Test",
+     m_msg_spark_test,
      &sparkTest,
   },
   {
-     "Pressure Sensor",
+     m_msg_pressure_sensor,
      &pressureSensorTest,
   },
   {
-     "Main Valve Test",
+     m_msg_main_valve_test,
      &mainValveTest,
   },
   {
-     "Remote Echo",
+     m_msg_remote_echo,
      &rmEchoTest,
   },
   {
-     "Local Opto",
+     m_msg_local_opto,
      &localOptoTest,
   },
   {
-     "Local Igniter",
+     m_msg_local_igniter,
      &igLocalTestEntry,
   },
   {
-     "Remote Igniter",
+     m_msg_remote_igniter,
      &igRemoteTestEntry,
   },
   {
-     "Power Voltage",
+     m_msg_power_voltage,
      &powerTest,
   },
 };

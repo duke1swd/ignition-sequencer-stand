@@ -48,7 +48,7 @@ static void flowButtonDisplay()
 		if (was_safe == 0) {
 			tft.fillRect(0,96,160,32, ST7735_RED);
 			tft.setCursor(12, 100);
-			tft.print("SAFE ERR");
+			tft.print(F("SAFE ERR"));
 			was_safe = 1;
 		}
 		return;
@@ -70,7 +70,7 @@ static void flowButtonDisplay()
 		c = ls2? ST7735_RED: TM_TXT_BKG_COLOR;
 		tft.fillRect(0, 96, 64, 32, c);	// erase the display spot
 		tft.setCursor(4, 100);
-		tft.print("N2O");
+		tft.print(F("N2O"));
 		ols1 = ls2;
 	}
 
@@ -81,7 +81,7 @@ static void flowButtonDisplay()
 		c = ls1? ST7735_RED: TM_TXT_BKG_COLOR;
 		tft.fillRect(96, 96, 64, 32, c);	// erase the display spot
 		tft.setCursor(100, 100);
-		tft.print("IPA");
+		tft.print(F("IPA"));
 		ols1 = ls1;
 	}
 }
@@ -99,11 +99,11 @@ void flowTestEnter()
 	tft.setTextSize(TM_TXT_SIZE+1);
 	tft.setCursor(32, TM_TXT_OFFSET);
 	tft.setTextColor(TM_TXT_FG_COLOR);
-	tft.print("FLOW");
+	tft.print(F("FLOW"));
 	tft.setTextSize(TM_TXT_SIZE);
 	tft.setCursor(50, TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
 	tft.setTextColor(TM_TXT_HIGH_COLOR);
-	tft.print("Test");
+	tft.print(F("Test"));
 	// force the display routine to refresh to state "off"
 	ols1 = 1;
 	ls1 = 0;
