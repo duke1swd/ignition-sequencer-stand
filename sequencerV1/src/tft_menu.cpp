@@ -29,10 +29,11 @@ const struct state * check_j_idle();
 const struct state * check_j_scroll();
 const struct state * check_j_wait();
 void joystick_display();
+void sensorInit();
 
 static struct state joystick_idle = {
 	"jstk idle",
-	NULL,			// Enter
+	sensorInit,		// Enter
 	NULL,			// Exit
 	check_j_idle,		// Check
 };
@@ -113,7 +114,9 @@ struct state * tft_menu_machine(const struct menu *my_menu)
 const struct state * check_j_idle()
 {
 	unsigned char v;
+	void sensorZero();
 
+	sensorZero();		// sample the pressure sensor
 	v = i_joystick->current_val;
 
 	if (v == JOY_PRESS) {
