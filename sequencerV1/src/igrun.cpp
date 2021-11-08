@@ -17,6 +17,7 @@
 #include "joystick.h"
 #include "tft_menu.h"
 #include "io_ref.h"
+#include "pressure.h"
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7735.h> // Hardware-specific library
 
@@ -193,7 +194,7 @@ const struct state * igLocalTestEntryCheck()
 		return error_state(errorIgPressureInsane, p);
 
 #ifndef NO_SENSOR
-	if (p < min_pressure || p > max_idle_pressure)
+	if (!PRESSURE_VALID(p))
 		return error_state(errorIgNoPressure, p);
 #endif
 
@@ -228,7 +229,7 @@ const struct state * igRemoteTestEntryCheck()
 
 
 #ifndef NO_SENSOR
-	if (p < min_pressure || p > max_idle_pressure)
+	if (!PRESSURE_VALID(p))
 		return error_state(errorIgNoPressure, p);
 #endif
 
@@ -286,7 +287,7 @@ const struct state * igLongTestEntryCheck()
 		return error_state(errorIgPressureInsane, p);
 
 #ifndef NO_SENSOR
-	if (p < min_pressure || p > max_idle_pressure)
+	if (!PRESSURE_VALID(p))
 		return error_state(errorIgNoPressure, p);
 #endif
 

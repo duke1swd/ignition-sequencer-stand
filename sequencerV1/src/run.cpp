@@ -52,6 +52,7 @@
 #include "io_ref.h"
 #include "events.h"
 #include "mainvalves.h"
+#include "pressure.h"
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7735.h> // Hardware-specific library
 
@@ -106,12 +107,12 @@ static void record_p(unsigned int p)
 	rep_n_samples++;
 	rep_sum_pressure += p;
 
-	if (p >= good_pressure) {
-		o_amberStatus->cur_state = off;
-		o_greenStatus->cur_state = on;
-	} else {
+	if (IG_PRESSURE_LESS_THAN(p, good_pressure_PSI)) {
 		o_amberStatus->cur_state = on;
 		o_greenStatus->cur_state = off;
+	} else {
+		o_amberStatus->cur_state = off;
+		o_greenStatus->cur_state = on;
 	}
 }
 
@@ -206,7 +207,7 @@ static const struct state * allAborts()
 
 	// abort if pressure sensor broken
 #ifndef NO_SENSOR
-	if (p < min_pressure) {
+	if (!PRESSURE_VALID(p)) {
 		event(IgPressFail);
 		return error_state(errorIgNoPressure, p);
 	}
@@ -222,7 +223,7 @@ static const struct state * allAborts()
 
 	// abort if pressure sensor broken
 #ifndef NO_SENSOR
-	if (p < min_pressure) {
+	if (!PRESSURE_VALID(p)) {
 		event(MainPressFail);
 		return error_state(errorMainNoPressure, p);
 	}
@@ -307,7 +308,7 @@ const struct state * runIgPressCheck()
 
 	// If good pressure, e.g. ignition, record the pressure sample
 	// and exit to the runIgRun state.
-	if (p >= good_pressure) {
+	if (!IG_PRESSURE_LESS_THAN(p, good_pressure_PSI)) {
 		// record when we first came up to pressure
 		at_pressure_t = loop_start_t;
 #ifdef DAQ1PRESSURE
@@ -364,10 +365,11 @@ const struct state * runIgRunCheck()
 	// Grace is over.
 
 	// Keep going until either too much time has passed or we flame out
-	if (p >= good_pressure && t <= ig_run_time)
-		return current_state;
-	if (p >= good_pressure)
+	if (!IG_PRESSURE_LESS_THAN(p, good_pressure_PSI)) {
+		if (t <= ig_run_time)
+			return current_state;
 		rep_stop_good = true;
+	}
 	return &igRunReport;
 }
 
@@ -457,10 +459,10 @@ const struct state * runIgDebugCheck()
 
 #ifdef DAQ1PRESSURE
 	// daq 1 records if good pressure or not.
-	if (p >= good_pressure)
-		o_daq1->cur_state = on;
-	else
+	if (IG_PRESSURE_LESS_THAN(p, good_pressure_PSI))
 		o_daq1->cur_state = off;
+	else
+		o_daq1->cur_state = on;
 #endif
 
 	// Run for a fixed length of time.

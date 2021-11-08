@@ -54,6 +54,7 @@
 #include "io_ref.h"
 #include "events.h"
 #include "mainvalves.h"
+#include "pressure.h"
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7735.h> // Hardware-specific library
 
@@ -158,7 +159,7 @@ allAborts()
 	}
 
 	// abort if pressure sensor broken
-	if (p < min_pressure || p > max_pressure) {
+	if (!PRESSURE_VALID(p)) {
 		event(IgPressFail);
 		return error_state(errorIgNoPressure, p);
 	}
@@ -172,7 +173,7 @@ allAborts()
 	}
 
 	// abort if pressure sensor broken
-	if (p < min_pressure || p > max_pressure) {
+	if (!PRESSURE_VALID(p)) {
 /*xxx*/Serial.print("MAIN ABORT:  p=");Serial.print(p);Serial.print("  min_pressure=");Serial.println(min_pressure);
 		event(MainPressFail);
 		return error_state(errorMainNoPressure, p);
@@ -279,15 +280,15 @@ const struct state * sequenceEntryCheck()
 	if (!SENSOR_SANE(p))
 		return error_state(errorIgPressureInsane, p);
 
-	if (p < min_pressure || p > max_idle_pressure)
+	if (!PRESSURE_VALID(p))
 		return error_state(errorIgNoPressure, p);
 
 	p = i_main_press->filter_a;
 	if (!SENSOR_SANE(p))
 		return error_state(errorMainPressureInsane, p);
 
-	if (p < min_pressure || p > max_idle_pressure) {
-/*xxx*/Serial.print("MAIN ABORT 2:  p=");Serial.print(p);Serial.print("  min_pressure=");Serial.print(min_pressure);Serial.print("  max_idle_pressure=");Serial.println(max_idle_pressure);
+	if (!PRESSURE_VALID(p)) {
+/*xxx*/Serial.print("MAIN ABORT 2:  p=");Serial.print(p);Serial.print("  min_pressure=");Serial.print(min_pressure);
 /*xxx*/Serial.print("  i_main_press->filter_a = ");Serial.println(i_main_press->filter_a);
 /*xxx*/Serial.print("  pin = ");Serial.println(i_main_press->pin);
 		return error_state(errorMainNoPressure, p);
@@ -521,7 +522,7 @@ sequenceIgPressureCheck()
 	
 	// p is the filtered pressure (counts * 4)
 	p = i_ig_pressure->filter_a;
-	pressGood = (p >= good_pressure);
+	pressGood = !IG_PRESSURE_LESS_THAN(p, good_pressure_PSI);
 
 	// process transitions of ig pressure above/below threshold.
 	// Also handles spark
@@ -608,14 +609,19 @@ sequenceMainValvesStartCheck()
 		return es;
 
 	p = i_ig_pressure->filter_a;
-	if (p < good_pressure) {
+	if (IG_PRESSURE_LESS_THAN(p, good_pressure_PSI)) {
 		event(IgFail2);
 		return error_state(errorIgFlameOut, p);
 	}
 
 	t = loop_start_t - pressstate_time;
 	p = i_main_press->filter_a;
-	if (p >= main_good_pressure)  {
+	if (MAIN_PRESSURE_LESS_THAN(p, main_good_pressure_PSI)) {
+		if (mainPressWasGood) {
+			event(MainPartialNAK);
+			mainPressWasGood = false;
+		}
+	} else {
 		if (mainPressWasGood) {
 			if (t >= main_stable_time) {
 				// Success!
@@ -626,11 +632,6 @@ sequenceMainValvesStartCheck()
 			event(MainPartialOK);
 			mainPressWasGood = true;
 			pressstate_time = loop_start_t;
-		}
-	} else {
-		if (mainPressWasGood) {
-			event(MainPartialNAK);
-			mainPressWasGood = false;
 		}
 	}
 

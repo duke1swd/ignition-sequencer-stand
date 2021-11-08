@@ -24,26 +24,6 @@ static const int n2o_open = n2o_close + SERVO_OPEN;
 
 
 /*
- * Pressure Settings
- */
-// these pressure numbers assume a 500 PSI pressure sensor operating at 0.5 to 4.5 volts and a 12 bit DAQ
-static const int min_pressure = 360;	// 0 psi gage, less margin for error
-static const int max_pressure = 3031;	// about 400 PSI
-static const int max_idle_pressure = 470;	// 0 psi gage, plus big margin for error
-//static const int good_pressure = 508;		// 15 psi gage
-static const int good_pressure = 737;		// 50 psi gage
-//static const int max_ig_pressure = 901;		// 75 psi gage
-static const int max_ig_pressure = 1196;		// 120 psi gage
-static const int main_good_pressure = 615;	// 35 PSI absolute
-#ifdef NO_SENSOR
-#define	SENSOR_SANE(x)	1
-#else
-#define	SENSOR_SANE(x) (((int16_t)(x)) > 90 && ((uint16_t)(x)) < ((uint16_t)4000))
-#endif
-
-static const int pressure_delta_allowed = 35;	// ig pressure can be this much less than main (about 5 PSI).
-
-/*
  * Timings
  */
 static const int ig_run_time = 1200;	// running time after ignition.  In milliseconds.

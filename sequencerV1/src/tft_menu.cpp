@@ -116,7 +116,7 @@ const struct state * check_j_idle()
 	unsigned char v;
 	void sensorZero();
 
-	sensorZero();		// sample the pressure sensor
+	sensorZero();		// sample the pressure sensors
 	v = i_joystick->current_val;
 
 	if (v == JOY_PRESS) {
