@@ -1,11 +1,15 @@
 /*
- * This code displays the current pressure sensor reading
+ * This code displays the current pressure sensor readings.
+ * Displays both the raw value and the calibrated PSI value.
+ *
+ * For sensor initialization code see sensorzero.cpp
  */
 
 #include "state_machine.h"
 #include "joystick.h"
 #include "tft_menu.h"
 #include "io_ref.h"
+#include "pressure.h"
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7735.h> // Hardware-specific library
 
@@ -18,7 +22,9 @@ struct state pressureSensorTest = { "pressureSensorTest", &pressureSensorTestEnt
 
 // local state of inputs.  Used to optimize display
 static unsigned char was_safe;
-static int32_t old_p;
+static int16_t ig_old_p;
+static int16_t main_old_p;
+static unsigned long last_display_time;
 
 static bool safe_ok()
 {
@@ -30,9 +36,11 @@ static bool safe_ok()
  */
 static void pressureSensorDisplay()
 {
-	int32_t p;
+	int16_t p;
 	int y;
+	char refresh_ok;
 
+	refresh_ok = 0;
 	tft.setTextColor(ST7735_WHITE);
 	tft.setTextSize(3);
 
@@ -52,31 +60,79 @@ static void pressureSensorDisplay()
 	if (was_safe) {
 		tft.fillRect(0, 96, 160, 32, TM_TXT_BKG_COLOR);
 		was_safe = 0;
+		main_old_p = -1;	// force redisplay
 	}
 
-	// p is the filtered pressure (counts * 4)
-	p = i_ig_pressure->filter_a;
-	if (p == old_p)
-		return;
-	old_p = p;
-	y = 3 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET;
-	tft.fillRect(20, y, 160, y+ 2*TM_TXT_HEIGHT, TM_TXT_BKG_COLOR);
 	tft.setTextSize(TM_TXT_SIZE);
-	tft.setCursor(20, y);
-	tft.print(p);
 
-	// Convert P into PSI.
-	//      0 = 0.0 volts
-	//  409.6 = 0.5 volts, 0 PSI
-	// 3276.8 / 500 counts per PSI
-	// 4096 = 5.0 volts
-	// 
-	p *= 10;
-	p -= 4096;	// 0 PSI = 0.5 volts
-	p = p * 500 / 32768;
-	y += TM_TXT_HEIGHT;
-	tft.setCursor(20, y);
-	tft.print(p);
+	// Display IG label
+	if (ig_old_p < 0) {
+		y = 3 * TM_TXT_HEIGHT + 16 + TM_TXT_OFFSET;
+		tft.setCursor(0, y);
+		tft.print(F("IG"));
+		ig_old_p = 0;
+	}
+
+	// Display MAIN label
+	if (main_old_p < 0) {
+		y = 4 * TM_TXT_HEIGHT + 16 + TM_TXT_OFFSET;
+		tft.setCursor(0, y);
+		tft.print(F("MN"));
+		main_old_p = 0;
+	}
+
+	if (loop_start_t - last_display_time > 500)
+		refresh_ok = 1;
+
+	// Refresh displays.
+	p = i_ig_pressure->filter_a;
+	if (p != ig_old_p && refresh_ok) {
+		ig_old_p = p;
+		last_display_time = loop_start_t;
+	
+		// Display raw count
+		y = 3 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET;
+		tft.fillRect(32, y, 160, y+ 2*TM_TXT_HEIGHT, TM_TXT_BKG_COLOR);
+		tft.setCursor(32, y);
+		tft.print(p);
+
+		// Display PSI
+		if (ig_valid && IG_PRESSURE_VALID(p)) {
+			tft.setCursor(96, y);
+			if (p < zero_ig)
+				p = 0;
+			else
+				p -= zero_ig;
+			p = (p * 16) / P_SLOPE_IG;
+			p /= 16;
+			tft.print(p);
+		}
+	}
+
+	p = i_main_press->filter_a;
+	if (p != main_old_p && refresh_ok) {
+		main_old_p = p;
+		last_display_time = loop_start_t;
+	
+		y = 3 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET;
+		last_display_time = loop_start_t;
+		y = 4 * TM_TXT_HEIGHT+16+TM_TXT_OFFSET;
+		tft.fillRect(32, y, 160, y+ 2*TM_TXT_HEIGHT, TM_TXT_BKG_COLOR);
+		tft.setCursor(32, y);
+		tft.print(p);
+
+		// Display PSI
+		if (main_valid && MAIN_PRESSURE_VALID(p)) {
+			tft.setCursor(96, y);
+			if (p < zero_main)
+				p = 0;
+			else
+				p -= zero_main;
+			p = (p * 16) / P_SLOPE_MAIN;
+			p /= 16;
+			tft.print(p);
+		}
+	}
 }
 
 /*
@@ -94,8 +150,11 @@ void pressureSensorTestEnter()
 	tft.setCursor(20, TM_TXT_HEIGHT+16+TM_TXT_OFFSET);
 	tft.setTextColor(TM_TXT_HIGH_COLOR);
 	tft.print(F("Sensor Test"));
-	// force the display routine to refresh to state "off"
-	old_p = -1;
+
+	// force the display routine to refresh
+	ig_old_p = -1;
+	main_old_p = -1;
+	last_display_time = loop_start_t;
 	pressureSensorDisplay();
 }
 
