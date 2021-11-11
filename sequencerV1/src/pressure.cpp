@@ -103,8 +103,7 @@ static void pressureSensorDisplay()
 				p = 0;
 			else
 				p -= zero_ig;
-			p = (p * 16) / P_SLOPE_IG;
-			p /= 16;
+			p = (p * PC_SCALE) / P_SLOPE_IG;
 			tft.print(p);
 		}
 	}
@@ -128,8 +127,7 @@ static void pressureSensorDisplay()
 				p = 0;
 			else
 				p -= zero_main;
-			p = (p * 16) / P_SLOPE_MAIN;
-			p /= 16;
+			p = (p * PC_SCALE) / P_SLOPE_MAIN;
 			tft.print(p);
 		}
 	}
