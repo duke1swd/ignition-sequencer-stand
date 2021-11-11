@@ -15,7 +15,8 @@ extern unsigned char main_valid;
 // p is the raw sensor reading, x is the comparison in psi
 #define	IG_PRESSURE_LESS_THAN(p, x)	((p) < zero_ig || (((p) - zero_ig) * PC_SCALE < (x) * P_SLOPE_IG))
 #define	MAIN_PRESSURE_LESS_THAN(p, x)	((p) < zero_main || (((p) - zero_main) * PC_SCALE < (x) * P_SLOPE_MAIN))
-#define	PRESSURE_VALID(p)		((p) >= min_pressure && (p) <= max_pressure)
+#define	IG_PRESSURE_VALID(p)		(ig_valid && (p) >= min_pressure && (p) <= max_pressure)
+#define	MAIN_PRESSURE_VALID(p)		(main_valid && (p) >= min_pressure && (p) <= max_pressure)
 
 /*
  * Pressure Settings
@@ -26,10 +27,5 @@ static const int max_pressure = 3031;		// about 400 PSI
 
 static const int good_pressure_PSI = 50;
 static const int main_good_pressure_PSI = 35;
-#ifdef NO_SENSOR
-#define	SENSOR_SANE(x)	1
-#else
-#define	SENSOR_SANE(x) (((int16_t)(x)) > 90 && ((uint16_t)(x)) < ((uint16_t)4000))
-#endif
 
 static const int pressure_delta_allowed = 35;	// ig pressure can be this much less than main (about 5 PSI).

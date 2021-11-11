@@ -56,7 +56,7 @@ void sensorZero()
 	n_samp++;
 	if (ig_valid) {
 		p = i_ig_pressure->filter_a;
-		if (PRESSURE_VALID(p)) {
+		if (IG_PRESSURE_VALID(p)) {
 			t_samp_ig += p;
 			zero_ig = t_samp_ig / n_samp;
 		} else {
@@ -66,7 +66,7 @@ void sensorZero()
 
 	if (main_valid) {
 		p = i_main_press->filter_a;
-		if (PRESSURE_VALID(p)) {
+		if (MAIN_PRESSURE_VALID(p)) {
 			t_samp_main += p;
 			zero_main = t_samp_main / n_samp;
 		} else {

@@ -42,7 +42,7 @@
  * 		menu clicking when repeated igntion tests are being run.
  */
 
-#define	NO_SENSOR 1
+//#define	NO_SENSOR 1
 
 #include "parameters.h"
 #include "state_machine.h"
@@ -200,14 +200,15 @@ static const struct state * allAborts()
 	// p is the filtered pressure (counts * 4)
 	p = i_ig_pressure->filter_a;
 
-	if (!SENSOR_SANE(p)) {
+#ifndef NO_SENSOR
+	// abort if we never calibrated the sensor
+	if (!ig_valid) {
 		event(IgPressFail);
 		return error_state(errorIgPressureInsane, p);
 	}
 
 	// abort if pressure sensor broken
-#ifndef NO_SENSOR
-	if (!PRESSURE_VALID(p)) {
+	if (!IG_PRESSURE_VALID(p)) {
 		event(IgPressFail);
 		return error_state(errorIgNoPressure, p);
 	}
@@ -216,14 +217,14 @@ static const struct state * allAborts()
 	// p is the filtered pressure (counts * 4)
 	p = i_main_press->filter_a;
 
-	if (!SENSOR_SANE(p)) {
+#ifndef NO_SENSOR
+	if (!main_valid) {
 		event(MainPressFail);
 		return error_state(errorMainPressureInsane, p);
 	}
 
 	// abort if pressure sensor broken
-#ifndef NO_SENSOR
-	if (!PRESSURE_VALID(p)) {
+	if (!MAIN_PRESSURE_VALID(p)) {
 		event(MainPressFail);
 		return error_state(errorMainNoPressure, p);
 	}

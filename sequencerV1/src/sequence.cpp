@@ -153,13 +153,13 @@ allAborts()
 	// p is the filtered pressure (counts * 4)
 	p = i_ig_pressure->filter_a;
 
-	if (!SENSOR_SANE(p)) {
+	if (!ig_valid) {
 		event(IgPressFail);
 		return error_state(errorIgPressureInsane, p);
 	}
 
 	// abort if pressure sensor broken
-	if (!PRESSURE_VALID(p)) {
+	if (!IG_PRESSURE_VALID(p)) {
 		event(IgPressFail);
 		return error_state(errorIgNoPressure, p);
 	}
@@ -167,13 +167,13 @@ allAborts()
 	// p is the filtered pressure (counts * 4)
 	p = i_main_press->filter_a;
 
-	if (!SENSOR_SANE(p)) {
+	if (!main_valid) {
 		event(MainPressFail);
 		return error_state(errorMainPressureInsane, p);
 	}
 
 	// abort if pressure sensor broken
-	if (!PRESSURE_VALID(p)) {
+	if (!MAIN_PRESSURE_VALID(p)) {
 /*xxx*/Serial.print("MAIN ABORT:  p=");Serial.print(p);Serial.print("  min_pressure=");Serial.println(min_pressure);
 		event(MainPressFail);
 		return error_state(errorMainNoPressure, p);
@@ -277,17 +277,17 @@ const struct state * sequenceEntryCheck()
 	o_redStatus->cur_state = on;
 
 	p = i_ig_pressure->filter_a;
-	if (!SENSOR_SANE(p))
+	if (!ig_valid)
 		return error_state(errorIgPressureInsane, p);
 
-	if (!PRESSURE_VALID(p))
+	if (!IG_PRESSURE_VALID(p))
 		return error_state(errorIgNoPressure, p);
 
 	p = i_main_press->filter_a;
-	if (!SENSOR_SANE(p))
+	if (!main_valid)
 		return error_state(errorMainPressureInsane, p);
 
-	if (!PRESSURE_VALID(p)) {
+	if (!MAIN_PRESSURE_VALID(p)) {
 /*xxx*/Serial.print("MAIN ABORT 2:  p=");Serial.print(p);Serial.print("  min_pressure=");Serial.print(min_pressure);
 /*xxx*/Serial.print("  i_main_press->filter_a = ");Serial.println(i_main_press->filter_a);
 /*xxx*/Serial.print("  pin = ");Serial.println(i_main_press->pin);

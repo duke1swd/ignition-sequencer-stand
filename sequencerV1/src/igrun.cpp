@@ -190,11 +190,9 @@ const struct state * igLocalTestEntryCheck()
 	unsigned int p;
 
 	p = i_ig_pressure->filter_a;
-	if (!SENSOR_SANE(p))
-		return error_state(errorIgPressureInsane, p);
 
 #ifndef NO_SENSOR
-	if (!PRESSURE_VALID(p))
+	if (!IG_PRESSURE_VALID(p))
 		return error_state(errorIgNoPressure, p);
 #endif
 
@@ -224,12 +222,9 @@ const struct state * igRemoteTestEntryCheck()
 	unsigned int p;
 
 	p = i_ig_pressure->filter_a;
-	if (!SENSOR_SANE(p))
-		return error_state(errorIgPressureInsane, p);
-
 
 #ifndef NO_SENSOR
-	if (!PRESSURE_VALID(p))
+	if (!IG_PRESSURE_VALID(p))
 		return error_state(errorIgNoPressure, p);
 #endif
 
@@ -283,11 +278,9 @@ const struct state * igLongTestEntryCheck()
 	unsigned int p;
 
 	p = i_ig_pressure->filter_a;
-	if (!SENSOR_SANE(p))
-		return error_state(errorIgPressureInsane, p);
 
 #ifndef NO_SENSOR
-	if (!PRESSURE_VALID(p))
+	if (!IG_PRESSURE_VALID(p))
 		return error_state(errorIgNoPressure, p);
 #endif
 

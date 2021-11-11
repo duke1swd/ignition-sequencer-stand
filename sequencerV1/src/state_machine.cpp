@@ -84,7 +84,7 @@ void handle_cmd() {
   if (!cmd_valid) return;
   if (input_discard) return;
   if (verbose) {
-    Serial.print("Command: '");
+    Serial.print(F("Command: '"));
     Serial.print(input_buf);
     Serial.println("'");
   }
@@ -94,13 +94,13 @@ void handle_cmd() {
   val_str = strtok(NULL, separator);  
   
   if (false && verbose) {
-    Serial.print("Command: '");
+    Serial.print(F("Command: '"));
     Serial.print((cmd_str != NULL) ? cmd_str : "NULL");
-    Serial.print("'\nId:      '");
+    Serial.print(F("'\nId:      '"));
     Serial.print((id_str != NULL) ? id_str : "NULL");
-    Serial.print("'\nVal:     '");
+    Serial.print(F("'\nVal:     '"));
     Serial.print((val_str != NULL) ? val_str : "NULL");
-    Serial.print("'\n");
+    Serial.print(F("'\n"));
   }
   
   if (cmd_str == NULL) {
@@ -136,29 +136,29 @@ void handle_cmd() {
   }
   
   if (strncmp(cmd_str, "?", 1) == 0) {
-    Serial.println("State machine console interface help.");
-    Serial.print("Build: ");
+    Serial.println(F("State machine console interface help."));
+    Serial.print(F("Build: "));
     Serial.println(build_str);
     Serial.println(help_str);
   } else if (strcmp(cmd_str, "read") == 0) {
     if (in != NULL) {
-      Serial.print("Normal: ");
+      Serial.print(F("Normal: "));
       Serial.println(input_mode_str[in->normal]);
-      Serial.print("Current: ");
+      Serial.print(F("Current: "));
       Serial.println(input_mode_str[in->current]);
-      Serial.print("Val: ");
+      Serial.print(F("Val: "));
       Serial.println(input_state_str[in->current_val]);
       if (in->analog_th >= 0) {
-        Serial.print("Filtered: ");
+        Serial.print(F("Filtered: "));
         Serial.println(in->filter_a);
       }
     }
     if (out != NULL) {
-      Serial.print("Output mode normal: ");
+      Serial.print(F("Output mode normal: "));
       Serial.println(output_mode_str[out->normal]);
-      Serial.print("Output mode current: ");
+      Serial.print(F("Output mode current: "));
       Serial.println(output_mode_str[out->current]);
-      Serial.print("Value: ");
+      Serial.print(F("Value: "));
       Serial.println(output_state_str[out->cur_state]);
     }
   } else if (strcmp(cmd_str, "reada") == 0) {
@@ -211,7 +211,7 @@ void handle_cmd() {
     Serial.println("Done printing trace");
  #endif
   } else if (strcmp(cmd_str, "state") == 0) {
-    Serial.print("Current state: ");
+    Serial.print(F("Current state: "));
     Serial.println(current_state->name);
   } else if (strcmp(cmd_str, "list_io") == 0) {
     Serial.println("\nAvailable inputs:");
@@ -331,7 +331,7 @@ void check_state() {
     if (new_state == NULL) myPanic("null state");
     if (new_state != current_state) {
       if (verbose) {
-        Serial.print("Leaving ");
+        Serial.print(F("Leaving "));
         Serial.print(current_state->name);
       }
       state_end_t = loop_start_t;
@@ -339,7 +339,7 @@ void check_state() {
       current_state = new_state;
       state_enter_t = state_end_t;
       if (verbose) {
-        Serial.print("; Entering ");
+        Serial.print(F("; Entering "));
         Serial.println(new_state->name);
       }
       if (current_state->enter != NULL) (*(current_state->enter))();
