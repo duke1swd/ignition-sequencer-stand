@@ -706,13 +706,37 @@ sequenceMVFullCheck()
 {
 	unsigned long t;
 	const struct state *es;
+	unsigned int i, m;
 
 	es = allAborts();
 	if (es)
 		return es;
 
 	// Check that ig pressure is not below chamber pressure.
-	if (i_ig_pressure->filter_a < i_main_press->filter_a - pressure_delta_allowed)
+	// This is complicated because unsigned math and varying zero-points of sensors.
+	// Also, need to not abort if both are at zero because we are out of fuel.
+	
+	// compute calibrated ig
+	i = i_ig_pressure->filter_a;
+	if (i < zero_ig)
+		i = 0;
+	else
+		i -= zero_ig;
+	
+	// compute calibrated main
+	m = i_main_press->filter_a;
+	if (m < zero_main)
+		m = 0;
+	else
+		m -= zero_main;
+
+	// check if ig too much less than main, but don't worry much if main is very low
+	if (m < 2 * pressure_delta_allowed)
+		m = 2 * pressure_delta_allowed;
+	else
+		m -= pressure_delta_allowed;
+
+	if (i < m)
 		return error_state(errorIgTooLow);
 
 	t = loop_start_t - full_time;
