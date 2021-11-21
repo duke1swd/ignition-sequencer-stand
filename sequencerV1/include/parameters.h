@@ -12,15 +12,16 @@ static const unsigned long spark_period = 25;	// milliseconds.  40 Hz
 #define	SERVO_CRACK 1
 #define SERVO_OPEN 90
 
-static const int ipa_close = 44;
+static const int ipa_close = 35;
 static const int ipa_crack = ipa_close + SERVO_CRACK;
 static const int ipa_partial = ipa_close + 33+10;
 static const int ipa_open = ipa_close + SERVO_OPEN;
 
-static const int n2o_close = 20;
-static const int n2o_crack = n2o_close + SERVO_CRACK;
-static const int n2o_partial = n2o_close + 37+10;
-static const int n2o_open = n2o_close + SERVO_OPEN;
+// this one goes backwards
+static const int n2o_close = 30+90;
+static const int n2o_crack = n2o_close - SERVO_CRACK;
+static const int n2o_partial = n2o_close - (37+10);
+static const int n2o_open = n2o_close - SERVO_OPEN;
 
 
 /*

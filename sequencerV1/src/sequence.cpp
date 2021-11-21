@@ -22,7 +22,7 @@
  */
 
 /* NO MAIN FAIL ENABLED */
-#define NOMAINFAIL 1
+//#define NOMAINFAIL 1
 
 /*
  * NOTES on daq output line control
@@ -515,7 +515,7 @@ sequenceIgPressureCheck()
 		return es;
 	
 	// if the igniter doesn't fire and stabilize within 500 ms, give up.
-	if (loop_start_t - sequence_time > ig_pressure_time) {
+	if (loop_start_t - sequence_phase_time > ig_pressure_time) {
 		event(IgFail1);
 		return error_state(errorIgNoIg);
 	}

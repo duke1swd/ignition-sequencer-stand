@@ -4,6 +4,7 @@
 
 unsigned long loop_start_t;
 void mainN2OSet(int v);
+void mainIPASet(int v);
 
 /*
  * Setup routine:
@@ -36,6 +37,6 @@ void loop() {
   if (ds < 1 || ds > 275) {
   	Serial.print("Out of range\n");
   } else {
-	mainN2OSet(ds);
+	mainIPASet(ds);
   }
 }
