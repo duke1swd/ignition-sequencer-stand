@@ -22,7 +22,7 @@
  */
 
 /* NO MAIN FAIL ENABLED */
-//#define NOMAINFAIL 1
+#define NOMAINFAIL 1
 
 /*
  * NOTES on daq output line control
