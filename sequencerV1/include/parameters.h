@@ -50,7 +50,11 @@ static const int ig_stable_no_spark = 40; // need 40 ms stble running with no sp
 static const int main_IPA_open_time = 0;	// open main IPA 0 ms after igniter OK
 static const int main_N2O_open_time = 50;	// open main N2O 40-60 ms after igniter OK
 static const int main_stable_time = 20;	// main chamber pressure to be up and stable for 20 milliseconds.
+#ifdef NOMAINPARTIAL
+static const int main_pressure_time = 10; // Cut this phase to 10 milliseconds if we are not using this phase.
+#else
 static const int main_pressure_time = 450; // main pressure to be stable at M+450
+#endif
 static const int main_ig_n2o_close = 400; // turn off igniter n2o after main up.
 static const int main_run_time = 8000;	// 8 second running time.
 

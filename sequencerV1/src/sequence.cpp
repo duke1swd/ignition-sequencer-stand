@@ -21,8 +21,26 @@
  *		This state dumps the event log to the DAQ.
  */
 
+/*
+ * The NOMAINFAIL flag removes the code that aborts if we do not
+ * detect pressure in the main chamber with valve partially open.
+ * 
+ * The NOMAINPARITAL flag implies we skip the state where we partially
+ * open the main valves.  This is implemented not by skipping this
+ * phase, but by shortening the phase to 10 milliseconds.
+ */
+
 /* NO MAIN FAIL ENABLED */
 #define NOMAINFAIL 1
+
+/* NO MAIN PARTIAL ENABLED */
+#define	NOMAINPARTIAL 1
+
+#ifdef NOMAINPARTIAL
+#ifndef NOMAINFAIL
+#define NOMAINFAIL 1
+#endif
+#endif
 
 /*
  * NOTES on daq output line control
