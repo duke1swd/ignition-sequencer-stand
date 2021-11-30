@@ -736,8 +736,10 @@ sequenceMVFullCheck()
 	else
 		m -= pressure_delta_allowed;
 
-	if (i < m)
+	if (i < m) {
+		event(IgLessMain);
 		return error_state(errorIgTooLow);
+	}
 
 	t = loop_start_t - full_time;
 

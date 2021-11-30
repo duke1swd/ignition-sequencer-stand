@@ -34,6 +34,7 @@ enum event_codes {
 	IgN2OClose,	// IgN2O valve closed
 	IgIPAClose,	// IgIPA valve closed
 	SequenceDone,	// Sequence complete
+	IgLessMain,	// Abort on ig pressure < main
 };
 
 /*
