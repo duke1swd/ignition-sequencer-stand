@@ -33,6 +33,8 @@ static const char ss_23[] PROGMEM = "IgN2O valve closed";
 static const char ss_24[] PROGMEM = "IgIPA valve closed";
 static const char ss_25[] PROGMEM = "Sequence complete";
 static const char ss_26[] PROGMEM = "Abort on ig pressure < main";
+static const char ss_27[] PROGMEM = "Ig zero recorded";
+static const char ss_28[] PROGMEM = "Main zero recorded";
 
 static const char * const event_code_names[] PROGMEM = {
 		ss_00,
@@ -62,4 +64,6 @@ static const char * const event_code_names[] PROGMEM = {
 		ss_24,
 		ss_25,
 		ss_26,
+		ss_27,
+		ss_28,
 };

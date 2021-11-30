@@ -203,13 +203,13 @@ static const struct state * allAborts()
 #ifndef NO_SENSOR
 	// abort if we never calibrated the sensor
 	if (!ig_valid) {
-		event(IgPressFail);
+		event(IgPressFail, p);
 		return error_state(errorIgPressureInsane, p);
 	}
 
 	// abort if pressure sensor broken
 	if (!IG_PRESSURE_VALID(p)) {
-		event(IgPressFail);
+		event(IgPressFail, p);
 		return error_state(errorIgNoPressure, p);
 	}
 #endif
@@ -219,13 +219,13 @@ static const struct state * allAborts()
 
 #ifndef NO_SENSOR
 	if (!main_valid) {
-		event(MainPressFail);
+		event(MainPressFail, p);
 		return error_state(errorMainPressureInsane, p);
 	}
 
 	// abort if pressure sensor broken
 	if (!MAIN_PRESSURE_VALID(p)) {
-		event(MainPressFail);
+		event(MainPressFail, p);
 		return error_state(errorMainNoPressure, p);
 	}
 #endif

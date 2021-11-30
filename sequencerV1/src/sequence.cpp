@@ -134,19 +134,19 @@ allAborts()
 #endif
 			i_push_1->current_val) {
 		I2->edge = no_edge;
-		event(OpAbort);
+		event(OpAbort, 1);
 		return error_state(errorSeqOpAbort);
 	}
 
 	// operator abort by safe switch
 	if (!safe_ok()) {
-		event(OpAbort);
+		event(OpAbort, 2);
 		return error_state(errorSeqSafe);
 	}
 
 	// operator abort by power switch
 	if (!power_ok()) {
-		event(OpAbort);
+		event(OpAbort, 3);
 		return error_state(errorSeqPower);
 	}
 
@@ -154,13 +154,13 @@ allAborts()
 	p = i_ig_pressure->filter_a;
 
 	if (!ig_valid) {
-		event(IgPressFail);
+		event(IgPressFail, p);
 		return error_state(errorIgPressureInsane, p);
 	}
 
 	// abort if pressure sensor broken
 	if (!IG_PRESSURE_VALID(p)) {
-		event(IgPressFail);
+		event(IgPressFail, p);
 		return error_state(errorIgNoPressure, p);
 	}
 
@@ -168,14 +168,14 @@ allAborts()
 	p = i_main_press->filter_a;
 
 	if (!main_valid) {
-		event(MainPressFail);
+		event(MainPressFail, p);
 		return error_state(errorMainPressureInsane, p);
 	}
 
 	// abort if pressure sensor broken
 	if (!MAIN_PRESSURE_VALID(p)) {
 /*xxx*/Serial.print("MAIN ABORT:  p=");Serial.print(p);Serial.print("  min_pressure=");Serial.println(min_pressure);
-		event(MainPressFail);
+		event(MainPressFail, p);
 		return error_state(errorMainNoPressure, p);
 	}
 
@@ -348,6 +348,8 @@ const struct state * sequenceEntryCheck()
 	// If the 'fire' button pressed, then it is time to go.
 	if (I2->current_val) {
 		event_enable();
+		event(IgZero, zero_ig);
+		event(MainZero, zero_main);
 		I2->edge = no_edge; // sequence will abort of rising edge of I2
 		return &sequenceIgLight;
 	}
@@ -417,7 +419,7 @@ const struct state *sequenceIgLightCheck()
 		 * This code is moved out of the entry routine to ensure a reasonable loop_start_t
 		 * Otherwise, the screen erase runs for 100 ms and loop_start_t is 100 ms out of date.
 		 */
-		event(IgStart);
+		event(IgStart, 0);
 		sequence_time = loop_start_t;
 		sequence_phase_time = loop_start_t;
 		light_enter = false;
@@ -437,7 +439,7 @@ const struct state *sequenceIgLightCheck()
 	// Time to crack the main valves a bit?
 	if (!mv_cracked && t >= mv_crack_time) {
 		mv_cracked = true;
-		event(MvSlack);
+		event(MvSlack, 0);
 		mainIPACrack();
 		mainN2OCrack();
 	}
@@ -445,14 +447,14 @@ const struct state *sequenceIgLightCheck()
 	// turn on the igniter IPA valve?
 	if (!ig_ipa_on && t >= ig_ipa_time) {
 		ig_ipa_on = true;
-		event(IgIPA);
+		event(IgIPA, 0);
 		o_ipaIgValve->cur_state = on;
 	}
 	
 	// turn on the igniter N2O valve?
 	if (!ig_n2o_on && t >= ig_n2o_time) {
 		ig_n2o_on = true;
-		event(IgN2O);
+		event(IgN2O, 0);
 		o_n2oIgValve->cur_state = on;
 	}
 	
@@ -460,7 +462,7 @@ const struct state *sequenceIgLightCheck()
 	if (t >= ig_spark_time) {
 		if (!ig_spark_on) {
 			ig_spark_on = true;
-			event(IgSpark);
+			event(IgSpark, 0);
 		}
 		spark_run();
 	}
@@ -516,7 +518,7 @@ sequenceIgPressureCheck()
 	
 	// if the igniter doesn't fire and stabilize within 500 ms, give up.
 	if (loop_start_t - sequence_phase_time > ig_pressure_time) {
-		event(IgFail1);
+		event(IgFail1, 0);
 		return error_state(errorIgNoIg);
 	}
 	
@@ -530,7 +532,7 @@ sequenceIgPressureCheck()
 		case pressNoPress:
 			spark_run();
 			if (pressGood) {
-				event(IgPressOK);
+				event(IgPressOK, p);
 				pressstate_time = loop_start_t;
 				pressstate = pressWaitSpark;
 			}
@@ -539,12 +541,12 @@ sequenceIgPressureCheck()
 		case pressWaitSpark:
 			spark_run();
 			if (!pressGood) {
-				event(IgPressNAK);
+				event(IgPressNAK, p);
 				pressstate_time = loop_start_t;
 				pressstate = pressNoPress;
 			} else if (loop_start_t - pressstate_time >= ig_stable_spark) {
-				event(IgPressStable);
-				event(IgSparkOff);
+				event(IgPressStable, p);
+				event(IgSparkOff, 0);
 				pressstate_time = loop_start_t;
 				pressstate = pressWaitNoSpark;
 			}
@@ -552,12 +554,12 @@ sequenceIgPressureCheck()
 
 		case pressWaitNoSpark:
 			if (!pressGood) {
-				event(IgPressNAK);
-				event(IgFail0);
+				event(IgPressNAK, p);
+				event(IgFail0, 0);
 				return error_state(errorIgFlameOut);
 			} else if (loop_start_t - pressstate_time >= ig_stable_no_spark) {
 				time_M = loop_start_t;
-				event(IgStable);
+				event(IgStable, p);
 				return &sequenceMainValvesStart;
 			}
 			break;
@@ -610,7 +612,7 @@ sequenceMainValvesStartCheck()
 
 	p = i_ig_pressure->filter_a;
 	if (IG_PRESSURE_LESS_THAN(p, good_pressure_PSI)) {
-		event(IgFail2);
+		event(IgFail2, p);
 		return error_state(errorIgFlameOut, p);
 	}
 
@@ -618,7 +620,7 @@ sequenceMainValvesStartCheck()
 	p = i_main_press->filter_a;
 	if (MAIN_PRESSURE_LESS_THAN(p, main_good_pressure_PSI)) {
 		if (mainPressWasGood) {
-			event(MainPartialNAK);
+			event(MainPartialNAK, p);
 			mainPressWasGood = false;
 		}
 	} else {
@@ -629,7 +631,7 @@ sequenceMainValvesStartCheck()
 				return &sequenceMVFull;
 			}
 		} else {
-			event(MainPartialOK);
+			event(MainPartialOK, p);
 			mainPressWasGood = true;
 			pressstate_time = loop_start_t;
 		}
@@ -639,9 +641,9 @@ sequenceMainValvesStartCheck()
 	// if no success by M+400, give up
 	t = loop_start_t - time_M;
 	if (t >= main_pressure_time) {
-		event(MainFail0);
+		event(MainFail0, p);
 #ifdef NOMAINFAIL
-			event(MainPartialOK);
+			event(MainPartialOK, p);
 			mainPressWasGood = true;
 			pressstate_time = loop_start_t;
 				closeMainOnExit = false;
@@ -653,14 +655,14 @@ sequenceMainValvesStartCheck()
 
 	// sequence opening the main valves
 	if (!mainIPAIsOpen && t >= main_IPA_open_time) {
-		event(MvIPAStart);
+		event(MvIPAStart, 0);
 		mainIPAPartial();
 		mainIPAIsOpen = true;
 		error_set_restartable(false);
 	}
 
 	if (!mainN2OIsOpen && t >= main_N2O_open_time) {
-		event(MvN2OStart);
+		event(MvN2OStart, 0);
 		mainN2OPartial();
 		mainN2OIsOpen = true;
 		error_set_restartable(false);
@@ -680,7 +682,7 @@ sequenceMVFullEnter()
 	o_ipaIgValve->cur_state = on;
 	o_n2oIgValve->cur_state = on;
 	error_set_restartable(false);
-	event(MvFull);
+	event(MvFull, 0);
 	mainN2OOpen();
 	mainIPAOpen();
 }
@@ -690,8 +692,8 @@ sequenceMVFullExit()
 {
 	o_daq0->cur_state = on;			// Set daq0 on error exit.
 	o_daq1->cur_state = off;
-	event(IgIPAClose);
-	event(SequenceDone);
+	event(IgIPAClose, 0);
+	event(SequenceDone, 0);
 	o_ipaIgValve->cur_state = off;
 	o_n2oIgValve->cur_state = off;
 	mainIPAClose();
@@ -737,7 +739,8 @@ sequenceMVFullCheck()
 		m -= pressure_delta_allowed;
 
 	if (i < m) {
-		event(IgLessMain);
+		event(IgLessMain, i);
+		event(IgLessMain, m);
 		return error_state(errorIgTooLow);
 	}
 
@@ -746,7 +749,7 @@ sequenceMVFullCheck()
 	if (t >= main_ig_n2o_close && ig_n2o_on) {
 		o_n2oIgValve->cur_state = off;
 		ig_n2o_on = false;
-		event(IgN2OClose);
+		event(IgN2OClose, 0);
 	}
 
 	if (t >= main_run_time)

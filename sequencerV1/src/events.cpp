@@ -17,10 +17,15 @@
 #include "eepromlocal.h"
 #include "event_names.h"
 
+// Events are 6 bytes long.  Storing 250 of them takes 1500 bytes.
+// This is about a quarter of the available ram (6KB for static, 2KB for stack)
 static struct event_s {
 	enum event_codes e_e;
 	unsigned int time_e;
+	unsigned int param_e;
 } event_buffer[EVENT_BUFFER_SIZE];
+
+static struct event_s *e_p;
 
 static unsigned long event_base_t;
 
@@ -36,12 +41,14 @@ void event_init()
 	enabled = false;
 	event_base_t = 0;	// don't have a base time yet.
 	n_events = 0;
+	e_p = event_buffer;
 }
 
 void event_enable()
 {
 	enabled = true;
 	n_events = 0;
+	e_p = event_buffer;
 }
 
 void event_disable()
@@ -53,7 +60,8 @@ void event_disable()
  * Called to record an event.
  * Pass in the event.  loop_start_t is used for the timestamp
  */
-void event(enum event_codes e) {
+void event(enum event_codes e, unsigned int p) {
+
 	if (!enabled)
 		return;
 
@@ -62,8 +70,10 @@ void event(enum event_codes e) {
 
 	// Record the event if we have space
 	if (n_events < EVENT_BUFFER_SIZE) {
-		event_buffer[n_events].e_e = e;
-		event_buffer[n_events].time_e = loop_start_t - event_base_t;
+		e_p->e_e = e;
+		e_p->time_e = loop_start_t - event_base_t;
+		e_p->param_e = p;
+		e_p++;
 	}
 
 	n_events++;
@@ -183,7 +193,9 @@ bool event_to_serial(int i) {
 
 	// Necessary casts and dereferencing, just copy.
 	strcpy_P(buffer, (char*)pgm_read_word(&(event_code_names[l_event.e_e])));
-	Serial.println(buffer);
+	Serial.print(buffer);
+	Serial.print("   ");
+	Serial.println(l_event.param_e);
 
 	return false;
 }

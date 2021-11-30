@@ -5,7 +5,7 @@
  * Here are the known events:
  */
 
-#define	EVENT_BUFFER_SIZE	500
+#define	EVENT_BUFFER_SIZE	250
 
 enum event_codes {
 	no_event,	// Nothing to nobody
@@ -35,6 +35,8 @@ enum event_codes {
 	IgIPAClose,	// IgIPA valve closed
 	SequenceDone,	// Sequence complete
 	IgLessMain,	// Abort on ig pressure < main
+	IgZero,		// Ig zero recorded
+	MainZero,	// Main zero recorded
 };
 
 /*
@@ -45,6 +47,6 @@ void event_init();
 void event_enable();
 void event_disable();
 unsigned int event_commit();
-void event(enum event_codes);
+void event(enum event_codes, unsigned int p);
 bool event_to_serial(int i);
 void event_commit_conditional();
