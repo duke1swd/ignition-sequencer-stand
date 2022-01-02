@@ -25,9 +25,9 @@
  * The NOMAINFAIL flag removes the code that aborts if we do not
  * detect pressure in the main chamber with valve partially open.
  * 
- * The NOMAINPARITAL flag implies we skip the state where we partially
- * open the main valves.  This is implemented not by skipping this
- * phase, but by shortening the phase to 10 milliseconds.
+ * The NOMAINPARITAL flag skips the sequenceMainValvesStart stater
+ * Actually, what it does is shorten this state to 10 ms and set
+ * NOMAINFAIL.
  */
 
 /* NO MAIN FAIL ENABLED */
@@ -534,12 +534,6 @@ sequenceIgPressureCheck()
 	if (es)
 		return es;
 	
-	// if the igniter doesn't fire and stabilize within 500 ms, give up.
-	if (loop_start_t - sequence_phase_time > ig_pressure_time) {
-		event(IgFail1, 0);
-		return error_state(errorIgNoIg);
-	}
-	
 	// p is the filtered pressure (counts * 4)
 	p = i_ig_pressure->filter_a;
 	pressGood = !IG_PRESSURE_LESS_THAN(p, good_pressure_PSI);
@@ -582,6 +576,13 @@ sequenceIgPressureCheck()
 			}
 			break;
 	}
+	
+	// if the igniter doesn't fire and stabilize within 500 ms, give up.
+	if (loop_start_t - sequence_phase_time > ig_pressure_time) {
+		event(IgFail1, p);
+		return error_state(errorIgNoIg);
+	}
+
 	return current_state;
 }
 
