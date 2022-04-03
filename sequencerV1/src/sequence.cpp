@@ -28,6 +28,8 @@
  * The NOMAINPARITAL flag skips the sequenceMainValvesStart stater
  * Actually, what it does is shorten this state to 10 ms and set
  * NOMAINFAIL.
+ *
+ * NOIGTOOLOW removes that check
  */
 
 /* NO MAIN FAIL ENABLED */
@@ -35,6 +37,9 @@
 
 /* NO MAIN PARTIAL ENABLED */
 #define	NOMAINPARTIAL 1
+
+/* NO IG TOO LOW CHECK
+#define NOIGTOOLOW 1
 
 #ifdef NOMAINPARTIAL
 #ifndef NOMAINFAIL
@@ -757,11 +762,14 @@ sequenceMVFullCheck()
 	else
 		m -= pressure_delta_allowed;
 
+#ifdef NOIGTOOLOW
+not reached
 	if (i < m) {
 		event(IgLessMain, i);
 		event(IgLessMain, m);
 		return error_state(errorIgTooLow);
 	}
+#endif
 
 	t = loop_start_t - full_time;
 
